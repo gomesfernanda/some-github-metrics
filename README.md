@@ -1,7 +1,7 @@
 ## GitHub Metrics
 
 I created this repo to gather some metrics for the company I work for.
-I used [GitHub’s REST API v3](https://developer.github.com/v3/){:target="_blank"} and [PyGitHub](http://pygithub.readthedocs.io){:target="_blank"} to develop the Python scripts.
+I used [GitHub’s REST API v3](https://developer.github.com/v3/) and [PyGitHub](http://pygithub.readthedocs.io) to develop the Python scripts.
 
 There are 4 functions on this repository:
 
@@ -25,4 +25,4 @@ function that returns the number of unique collaborators of an organization (for
 function that gather basic metrics for all repos of an organization, such as number of forks, number of stars, number of commits and number of collaborators. The function returns a csv file with these informations for each repo
 
 
-For all functions, you have to input your authorization token, that is provided by GitHub at [https://github.com/settings/tokens](https://github.com/settings/tokens){:target="_blank"}
+For all functions, you have to input your authorization token, that is provided by GitHub at [https://github.com/settings/tokens](https://github.com/settings/tokens)
