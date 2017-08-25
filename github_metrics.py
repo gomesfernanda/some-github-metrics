@@ -7,6 +7,9 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 csv_repoinfo = 'github_repos_metrics.csv'
 csv_externalcontr = 'github_externalcontr.csv'
@@ -16,12 +19,21 @@ csv_uniquecollabs = "github_uniquecollaborators.csv"
 
 def getOrgMembers(authToken):
     g = Github(authToken)
-    loginmembers = []
     namesmembers = []
+    text_file = open("memblist.txt", "r")
+    loginmembers = text_file.read().split(',')
     for orgs in g.get_user().get_orgs():
         for memb in orgs.get_members():
-            loginmembers.append(memb.login)
-            namesmembers.append(memb.name)
+            if memb.login not in loginmembers:
+                loginmembers.append(memb.login)
+    for member in loginmembers:
+        url_user = "https://api.github.com/users/" + member
+        request = Request(url_user)
+        request.add_header('Authorization', 'token %s' % authToken)
+        response = urlopen(request)
+        r_user = json.load(response)
+        if r_user["name"] != None:
+            namesmembers.append(r_user["name"])
     return loginmembers, namesmembers
 
 
@@ -142,3 +154,4 @@ def getBasicRepoStats(user, authToken):
                     csvwriter.writerow([count, item['name'], item['forks_count'], item['stargazers_count'], cont_commits, cont_colabs, item['description']])
                     print(count, " ", item['name'], "|", item['forks_count'], "forks |", item['stargazers_count'], "stars |", cont_commits, "commits |", cont_colabs, "collaborators |",
                         item['description'])
+

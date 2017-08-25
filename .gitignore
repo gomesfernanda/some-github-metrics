@@ -1,0 +1,9 @@
+# Member list
+memblist.txt
+
+# Other
+bin/
+include/
+lib/
+pip-selfcheck.json
+pyvenv.cfg
