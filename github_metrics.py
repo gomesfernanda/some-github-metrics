@@ -37,7 +37,7 @@ def getOrgMembers(authToken):
     return loginmembers, namesmembers
 
 
-def getRepoStatsContributions(authToken):
+def getRepoStatsContributions(authToken, notparsedrepo):
     g = Github(authToken)
     with open("github_repoinfomodule2.csv", 'w', encoding='utf-8') as csvfile:
         df = pd.DataFrame(columns=["# loop", 'repo name', 'week', 'additions', "deletions", "commits", "author", "is a member?"])
@@ -48,33 +48,34 @@ def getRepoStatsContributions(authToken):
         company = company.strip(" ")
         csvwriter.writerow(["# loop", 'repo name', 'week', 'additions', "deletions", "commits", "author", "is a member?"])
         for repo in g.get_user().get_repos():
-            if repo.fork == False and repo.private == False and repo.full_name[:len(company)] == company:
-                count = 0
-                reponame = repo.name
-                print("\n","Working on repo:", reponame)
-                try:
-                    for stat in repo.get_stats_contributors():
-                        author = str(stat.author)
-                        author = (author.replace('NamedUser(login="',"")).replace('")', "")
-                        for week in stat.weeks:
-                            count += 1
-                            date = str(week.w)
-                            date = date[:10]
-                            if author in loginmembers:
-                                print(".", end=" ")
-                                try:
-                                    csvwriter.writerow([count, reponame, date, week.a, week.d, week.c, author, "yes"])
-                                except:
-                                    print("error")
-                            else:
-                                print(".", end=" ")
-                                try:
-                                    csvwriter.writerow([count, reponame, date, week.a, week.d, week.c, author, "no"])
-                                except:
-                                    print("error2")
-                except:
-                    print("none")
-                    csvwriter.writerow([count, reponame, 0, 0, 0, 0, 0, "n/a"])
+            if repo.name != notparsedrepo:
+                if repo.fork == False and repo.private == False and repo.full_name[:len(company)] == company:
+                    count = 0
+                    reponame = repo.name
+                    print("\n","Working on repo:", reponame)
+                    try:
+                        for stat in repo.get_stats_contributors():
+                            author = str(stat.author)
+                            author = (author.replace('NamedUser(login="',"")).replace('")', "")
+                            for week in stat.weeks:
+                                count += 1
+                                date = str(week.w)
+                                date = date[:10]
+                                if author in loginmembers:
+                                    print(".", end=" ")
+                                    try:
+                                        csvwriter.writerow([count, reponame, date, week.a, week.d, week.c, author, "yes"])
+                                    except:
+                                        print("error")
+                                else:
+                                    print(".", end=" ")
+                                    try:
+                                        csvwriter.writerow([count, reponame, date, week.a, week.d, week.c, author, "no"])
+                                    except:
+                                        print("error2")
+                    except:
+                        print("none")
+                        csvwriter.writerow([count, reponame, 0, 0, 0, 0, 0, "n/a"])
 
 
 def uniqueCollabs(authToken):
@@ -154,4 +155,3 @@ def getBasicRepoStats(user, authToken):
                     csvwriter.writerow([count, item['name'], item['forks_count'], item['stargazers_count'], cont_commits, cont_colabs, item['description']])
                     print(count, " ", item['name'], "|", item['forks_count'], "forks |", item['stargazers_count'], "stars |", cont_commits, "commits |", cont_colabs, "collaborators |",
                         item['description'])
-
