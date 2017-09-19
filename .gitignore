@@ -5,6 +5,7 @@ github_repos_metrics.csv
 github_externalcontr.csv
 github_repobasicmetrics.csv
 github_uniquecollaborators.csv
+github_RepoStatsContributions.csv
 
 
 # Other
