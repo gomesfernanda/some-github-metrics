@@ -39,7 +39,7 @@ def getOrgMembers(authToken):
 
 def getRepoStatsContributions(authToken, notparsedrepo):
     g = Github(authToken)
-    with open("github_repoinfomodule2.csv", 'w', encoding='utf-8') as csvfile:
+    with open("github_RepoStatsContributions.csv", 'w', encoding='utf-8') as csvfile:
         df = pd.DataFrame(columns=["# loop", 'repo name', 'week', 'additions', "deletions", "commits", "author", "is a member?"])
         csvwriter = csv.writer(csvfile, delimiter=',')
         loginmembers, namesmembers = getOrgMembers(authToken)
@@ -155,3 +155,12 @@ def getBasicRepoStats(user, authToken):
                     csvwriter.writerow([count, item['name'], item['forks_count'], item['stargazers_count'], cont_commits, cont_colabs, item['description']])
                     print(count, " ", item['name'], "|", item['forks_count'], "forks |", item['stargazers_count'], "stars |", cont_commits, "commits |", cont_colabs, "collaborators |",
                         item['description'])
+
+
+currenttoken = input("Please provide personal access token --> ")
+currentuser = input("Please provide username --> ")
+wontparse = input("Name of the repo not to be parsed --> ")
+
+# getOrgMembers(currenttoken)
+# getRepoStatsContributions(currenttoken, wontparse)
+# getBasicRepoStats(currentuser, currenttoken)
