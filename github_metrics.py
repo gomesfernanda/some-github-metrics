@@ -1,12 +1,8 @@
 import json
 from urllib.request import urlopen, Request
 from github import Github
-import requests
 import csv
 import pandas as pd
-import seaborn as sns
-import numpy as np
-import matplotlib.pyplot as plt
 import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -80,7 +76,7 @@ def getRepoStatsContributions(authToken, notparsedrepo):
 
 def uniqueCollabs(authToken):
     g = Github(authToken)
-    with open(csv_uniquecollabs, 'w', encoding='utf-8') as csvfile:
+    with open(csv_uniquecollabs, "w", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(["name", "login", "is a member of the organization?"])
         loginmembers, namesmembers = getOrgMembers(authToken)
@@ -113,54 +109,54 @@ def uniqueCollabs(authToken):
 
 def getBasicRepoStats(user, authToken):
     g = Github(authToken)
-    with open(csv_githubbasicstats, 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(["count", "repo", "forks", "stars", "commits", "collaborators", "description"])
+    with open(csv_githubbasicstats, "w", encoding="utf-8") as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=",")
+        csvwriter.writerow(["count", "repo", "forks", "stars", "watches", "commits", "collaborators", "description"])
         url_repos = "https://api.github.com/users/" + user + "/orgs"
         request = Request(url_repos)
-        request.add_header('Authorization', 'token %s' % authToken)
+        request.add_header("Authorization", "token %s" % authToken)
         response = urlopen(request)
         r_user = json.load(response)
         for item in r_user:
-            org = item['login']
+            org = item["login"]
         for i in range(1, 21):
             url_orgrepos = "https://api.github.com/orgs/" + org + "/repos?page=" + str(i) + "&per_page=100"
             request = Request(url_orgrepos)
-            request.add_header('Authorization', 'token %s' % authToken)
+            request.add_header("Authorization", "token %s" % authToken)
             response = urlopen(request)
             r_orgs = json.load(response)
             count = 0
             for item in r_orgs:
                 cont_colabs = 0
                 cont_commits = 0
-                if item['fork'] == False and item['private'] == False:
+                if item["fork"] == False and item["private"] == False:
                     count += 1
-                    colabs_url = item['contributors_url']
+                    colabs_url = item["contributors_url"]
                     request = Request(colabs_url)
-                    request.add_header('Authorization', 'token %s' % authToken)
+                    request.add_header("Authorization", "token %s" % authToken)
                     response = urlopen(request)
                     r_colabs = json.load(response)
                     for col in r_colabs:
                         cont_colabs += 1
                     for j in range(1, 21):
-                        commits_url = str(item['commits_url'])
+                        commits_url = str(item["commits_url"])
                         commits_url = commits_url[:-6]
                         commits_url = commits_url + "?page=" + str(j) + "&per_page=100"
                         request = Request(commits_url)
-                        request.add_header('Authorization', 'token %s' % authToken)
+                        request.add_header("Authorization", "token %s" % authToken)
                         response = urlopen(request)
                         r_commits = json.load(response)
                         for comm in r_commits:
                             cont_commits += 1
-                    csvwriter.writerow([count, item['name'], item['forks_count'], item['stargazers_count'], cont_commits, cont_colabs, item['description']])
-                    print(count, " ", item['name'], "|", item['forks_count'], "forks |", item['stargazers_count'], "stars |", cont_commits, "commits |", cont_colabs, "collaborators |",
-                        item['description'])
+                    csvwriter.writerow([count, item["name"], item["forks_count"], item["stargazers_count"], item["watchers_count"], cont_commits, cont_colabs, item["description"]])
+                    print(count, " ", item["name"], "|", item["forks_count"], "forks |", item["stargazers_count"], "stars |", item["watchers_count"], " watchers |", cont_commits, "commits |", cont_colabs, "collaborators |",
+                        item["description"])
 
 
 currenttoken = input("Please provide personal access token --> ")
 currentuser = input("Please provide username --> ")
 wontparse = input("Name of the repo not to be parsed --> ")
 
-# getOrgMembers(currenttoken)
-# getRepoStatsContributions(currenttoken, wontparse)
-# getBasicRepoStats(currentuser, currenttoken)
+getOrgMembers(currenttoken)
+getRepoStatsContributions(currenttoken, wontparse)
+getBasicRepoStats(currentuser, currenttoken)
