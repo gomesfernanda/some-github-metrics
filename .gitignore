@@ -1,6 +1,8 @@
 # Member list
 memblist_src-d.txt
 memblist_bblfsh.txt
+
+# Resulting CSVs
 github_repoinfomodule2.csv
 github_repos_metrics.csv
 github_externalcontr.csv
@@ -15,3 +17,4 @@ include/
 lib/
 pip-selfcheck.json
 pyvenv.cfg
+WIP/
