@@ -120,37 +120,39 @@ def getRepo_Community(organization, authToken):
                              countcollab, repo.description])
 
 
-# def uniqueCollabs(organization, authToken):
-#     g = Github(authToken)
-#     with open(csv_uniquecollabs, "w", encoding="utf-8") as csvfile:
-#         csvwriter = csv.writer(csvfile, delimiter=',')
-#         csvwriter.writerow(["name", "login", "is a member of the organization?"])
-#         loginmembers, namesmembers = getOrgMembers(organization, authToken)
-#         nameslist = []
-#         company = g.get_user().company
-#         company = company.strip("@")
-#         company = company.strip(" ")
-#         for repo in g.get_user().get_repos():
-#             count = 0
-#             if repo.fork == False and repo.private == False and repo.full_name[:len(company)] == company:
-#                 for commit in repo.get_commits():
-#                     count += 1
-#                     try:
-#                         author = commit.author
-#                         name = commit.author.name
-#                         if name not in nameslist:
-#                             author = str(author)
-#                             nameslist.append(name)
-#                             author = author.replace('")', '')
-#                             author = author.replace('NamedUser(login="', '')
-#                             if author not in loginmembers:
-#                                 csvwriter.writerow([name, author, "no"])
-#                                 print(name, "|", author, "| no")
-#                             else:
-#                                 csvwriter.writerow([name, author, "yes"])
-#                                 print(name, "|", author, "| yes")
-#                     except:
-#                         count += 1
+def getUniqueCollabs(organization, authToken):
+    g = Github(authToken)
+    with open("UniqueCollabs_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',')
+        csvwriter.writerow(["name", "login", "name", "member of the org?"])
+        loginmembers, namesmembers = getOrgMembers(organization, authToken)
+        userslist=[]
+        nameslist=[]
+        allorgs = g.get_user().get_orgs()
+        for orgs in allorgs:
+            if orgs.login == organization:
+                count = 0
+                for repo in orgs.get_repos():
+                    if repo.fork == False and repo.private == False:
+                        for collab in repo.get_contributors():
+                            if collab.login not in userslist:
+                                userslist.append(collab.login)
+                                if collab.name != None:
+                                    nameslist.append(collab.name)
+                                else:
+                                    nameslist.append(collab.login)
+                                count += 1
+                                collablogin = collab.login
+                                if collab.name == None:
+                                    collabname = collab.login
+                                else:
+                                    collabname = collab.name
+                                if collablogin in loginmembers:
+                                    member = "yes"
+                                else:
+                                    member = "no"
+                                print(count, "|", member, "|", collablogin, "|", collabname)
+                                csvwriter.writerow([count, collablogin, collabname, member])
 
 
 currenttoken = input("\n[STEP 1] Please provide personal access token --> ")
@@ -167,12 +169,16 @@ try:
     currentorg = orgs_list[int(selectednumber)]
     print("You chose:", currentorg, "\n")
     print("[STEP 3]")
-    members_Yn = input("Do you want to see the members of this organization? [Y/n]: ")
-    codefreq_Yn = input("Do you want to export code frequency for all repos? [Y/n]: ")
-    community_Yn = input("Do you want to export community metrics for all repos? [Y/n]: ")
+    members_Yn = input("See the members of this org? [Y/n]: ")
+    unique_Yn = input("Export list of unique collaborators for this org? [Y/n]: ")
+    codefreq_Yn = input("Export code frequency for all repos? [Y/n]: ")
+    community_Yn = input("Export community metrics for all repos? [Y/n]: ")
     print("\n======================= Starting process =======================\n")
     if members_Yn == "Y" or members_Yn == "y":
         print(getOrgMembers(currentorg, currenttoken))
+        print("")
+    if unique_Yn == "Y" or unique_Yn == "y":
+        print(getUniqueCollabs(currentorg, currenttoken))
         print("")
     if codefreq_Yn == "Y" or codefreq_Yn == "y":
         getRepo_CodeFrequency(currentorg, currenttoken)
