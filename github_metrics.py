@@ -56,6 +56,7 @@ def getRepo_CodeFrequency(organization, authToken, notparsedrepo=None):
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
+                print("Gathering code frequency for all repos on", orgs.name, "\n")
                 count = 0
                 for repo in orgs.get_repos():
                     if repo.fork == False and repo.private == False:
@@ -131,6 +132,7 @@ def getUniqueCollabs(organization, authToken):
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
+                print("Gathering unique collaborators for", orgs.name, "\n")
                 count = 0
                 for repo in orgs.get_repos():
                     if repo.fork == False and repo.private == False:
