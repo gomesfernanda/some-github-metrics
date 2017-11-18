@@ -20,7 +20,7 @@ function that builds a list with the members of an organization inside GitHub. O
 function that gather statistics for all repositories in an organization, by week/user/repo, and returns a csv file with: name of the repository, week in question, number of additions, number of deletions, author of such commit and if the author is a member or not of the organization.
 
 
-**4) `getUniqueCollabs(token)`**
+**4) `getUniqueCollabs(org, token)`**
 
 function that returns the number of unique collaborators of an organization (for all its repos), with the information if the collaborator is a member of the organization or not.
 
