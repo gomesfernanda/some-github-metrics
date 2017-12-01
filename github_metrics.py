@@ -1,5 +1,4 @@
 import json
-from urllib.request import urlopen, Request
 from github import Github
 import csv
 import ssl
@@ -8,12 +7,13 @@ import requests
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def getOrgs(authToken):
+def list_orgs(authToken):
     g = Github(authToken)
     orgslist = []
     for orgs in g.get_user().get_orgs():
         orgslist.append(orgs.login)
     return orgslist
+
 
 def list_org_members(org, authToken):
     s = requests.Session()
@@ -45,7 +45,7 @@ def list_org_members(org, authToken):
     return loginmembers, namesmembers
 
 
-def getRepo_CodeFrequency(organization, authToken, notparsedrepo=None):
+def export_code_frequency(organization, authToken, notparsedrepo=None):
     g = Github(authToken)
     with open("github_RepoStatsContributions_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -93,7 +93,7 @@ def getRepo_CodeFrequency(organization, authToken, notparsedrepo=None):
                 next
 
 
-def getRepo_Community(organization, authToken):
+def export_community_engagement(organization, authToken):
     g = Github(authToken)
     with open("github_BasicInfo_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -120,7 +120,7 @@ def getRepo_Community(organization, authToken):
                              countcollab, repo.description])
 
 
-def getUniqueCollabs(organization, authToken):
+def list_unique_collaborators(organization, authToken):
     g = Github(authToken)
     with open("UniqueCollabs_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -158,7 +158,7 @@ def getUniqueCollabs(organization, authToken):
 
 currenttoken = input("\n[STEP 1] Please provide personal access token --> ")
 
-orgs_list = getOrgs(currenttoken)
+orgs_list = list_orgs(currenttoken)
 
 print("\n[STEP 2] Select the organization you want to analyse:")
 for i in range(0, len(orgs_list)):
@@ -180,13 +180,13 @@ try:
         print(list_org_members(currentorg, currenttoken))
         print("")
     if unique_Yn == "Y" or unique_Yn == "y":
-        print(getUniqueCollabs(currentorg, currenttoken))
+        print(list_unique_collaborators(currentorg, currenttoken))
         print("")
     if codefreq_Yn == "Y" or codefreq_Yn == "y":
-        getRepo_CodeFrequency(currentorg, currenttoken, dontparse)
+        export_code_frequency(currentorg, currenttoken, dontparse)
         print("")
     if community_Yn == "Y" or community_Yn == "y":
-        getRepo_Community(currentorg, currenttoken)
+        export_community_engagement(currentorg, currenttoken)
     print("\n======================= End of process =======================\n")
 except:
     print("Sorry, option not available")
