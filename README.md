@@ -1,4 +1,6 @@
-## GitHub Metrics
+# GitHub Metrics
+
+**Notice:** `urllib` to be migrated to `requests` library. 
 
 I created this repo to gather some metrics for [sourced{d}](https://github.com/src-d/).
 I used [GitHub’s REST API v3](https://developer.github.com/v3/) and [PyGitHub](http://pygithub.readthedocs.io) to develop the Python scripts.
