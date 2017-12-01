@@ -1,13 +1,13 @@
 import json
-from urllib.request import urlopen, Request
 from github import Github
 import csv
 import ssl
+import requests
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def getOrgs(authToken):
+def list_orgs(authToken):
     g = Github(authToken)
     orgslist = []
     for orgs in g.get_user().get_orgs():
@@ -15,7 +15,9 @@ def getOrgs(authToken):
     return orgslist
 
 
-def getOrgMembers(org, authToken):
+def list_org_members(org, authToken):
+    s = requests.Session()
+    s.headers.update({'Authorization': 'token ' + authToken})
     g = Github(authToken)
     namesmembers = []
     try:
@@ -34,11 +36,8 @@ def getOrgMembers(org, authToken):
     if loginmembers[0] == "":
         loginmembers.pop(0)
     for member in loginmembers:
-        url_user = "https://api.github.com/users/" + member
-        request = Request(url_user)
-        request.add_header('Authorization', 'token %s' % authToken)
-        response = urlopen(request)
-        r_user = json.load(response)
+        r = s.get("https://api.github.com/users/" + member)
+        r_user = json.loads(r.text)
         if r_user["name"] != None:
             namesmembers.append(r_user["name"])
         else:
@@ -46,20 +45,20 @@ def getOrgMembers(org, authToken):
     return loginmembers, namesmembers
 
 
-def getRepo_CodeFrequency(organization, authToken, notparsedrepo=None):
+def export_code_frequency(organization, authToken, notparsedrepo=None):
     g = Github(authToken)
     with open("github_RepoStatsContributions_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "external"])
-        loginmembers, namesmembers = getOrgMembers(organization, authToken)
+        loginmembers, namesmembers = list_org_members(organization, authToken)
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
                 print("Gathering code frequency for all repos on", orgs.name, "\n")
                 count = 0
                 for repo in orgs.get_repos():
-                    if repo.fork == False and repo.private == False:
+                    if repo.fork == False and repo.private == False and repo.name != notparsedrepo:
                         count += 1
                         print(count, "| ", orgs.login, " | ", repo.name)
                         reponame = repo.name
@@ -94,7 +93,7 @@ def getRepo_CodeFrequency(organization, authToken, notparsedrepo=None):
                 next
 
 
-def getRepo_Community(organization, authToken):
+def export_community_engagement(organization, authToken):
     g = Github(authToken)
     with open("github_BasicInfo_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -121,14 +120,14 @@ def getRepo_Community(organization, authToken):
                              countcollab, repo.description])
 
 
-def getUniqueCollabs(organization, authToken):
+def list_unique_collaborators(organization, authToken):
     g = Github(authToken)
     with open("UniqueCollabs_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(["name", "login", "name", "member of the org?"])
-        loginmembers, namesmembers = getOrgMembers(organization, authToken)
-        userslist=[]
-        nameslist=[]
+        loginmembers, namesmembers = list_org_members(organization, authToken)
+        userslist = []
+        nameslist = []
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
@@ -159,13 +158,14 @@ def getUniqueCollabs(organization, authToken):
 
 currenttoken = input("\n[STEP 1] Please provide personal access token --> ")
 
-orgs_list = getOrgs(currenttoken)
+orgs_list = list_orgs(currenttoken)
 
 print("\n[STEP 2] Select the organization you want to analyse:")
 for i in range(0, len(orgs_list)):
     print("[", i, "] ", orgs_list[i])
 
 selectednumber = input(" ")
+dontparse = input("Repo not to be parsed: ")
 
 try:
     currentorg = orgs_list[int(selectednumber)]
@@ -177,16 +177,16 @@ try:
     community_Yn = input("Export community metrics for all repos? [Y/n]: ")
     print("\n======================= Starting process =======================\n")
     if members_Yn == "Y" or members_Yn == "y":
-        print(getOrgMembers(currentorg, currenttoken))
+        print(list_org_members(currentorg, currenttoken))
         print("")
     if unique_Yn == "Y" or unique_Yn == "y":
-        print(getUniqueCollabs(currentorg, currenttoken))
+        print(list_unique_collaborators(currentorg, currenttoken))
         print("")
     if codefreq_Yn == "Y" or codefreq_Yn == "y":
-        getRepo_CodeFrequency(currentorg, currenttoken)
+        export_code_frequency(currentorg, currenttoken, dontparse)
         print("")
     if community_Yn == "Y" or community_Yn == "y":
-        getRepo_Community(currentorg, currenttoken)
+        export_community_engagement(currentorg, currenttoken)
     print("\n======================= End of process =======================\n")
 except:
     print("Sorry, option not available")
