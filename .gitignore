@@ -13,3 +13,5 @@ pip-selfcheck.json
 pyvenv.cfg
 WIP/
 WIP/**
+metrics-env/
+metrics-env/**

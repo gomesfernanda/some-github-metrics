@@ -1,11 +1,17 @@
-import json
+import argparse
 from github import Github
+import requests
+import json
+import os
 import csv
 import ssl
-import requests
 
-ssl._create_default_https_context = ssl._create_unverified_context
-
+def setup():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--org", help="choose what company you what to see", required=True)
+    parser.add_argument("-t", "--token", help="OAuth token from GitHub", required=True)
+    args = parser.parse_args()
+    return args
 
 def list_orgs(authToken):
     g = Github(authToken)
@@ -13,7 +19,6 @@ def list_orgs(authToken):
     for orgs in g.get_user().get_orgs():
         orgslist.append(orgs.login)
     return orgslist
-
 
 def list_org_members(org, authToken):
     s = requests.Session()
@@ -38,15 +43,18 @@ def list_org_members(org, authToken):
     for member in loginmembers:
         r = s.get("https://api.github.com/users/" + member)
         r_user = json.loads(r.text)
-        if r_user["name"] != None:
-            namesmembers.append(r_user["name"])
-        else:
-            namesmembers.append(r_user["login"])
+        try:
+            if r_user["name"] != None:
+                namesmembers.append(r_user["name"])
+            else:
+                namesmembers.append(r_user["login"])
+        except:
+            next
     return loginmembers, namesmembers
 
-
-def export_code_frequency(organization, authToken, notparsedrepo=None):
+def export_code_frequency(organization, authToken):
     g = Github(authToken)
+    # time.sleep(15)
     with open("github_RepoStatsContributions_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
@@ -58,9 +66,9 @@ def export_code_frequency(organization, authToken, notparsedrepo=None):
                 print("Gathering code frequency for all repos on", orgs.name, "\n")
                 count = 0
                 for repo in orgs.get_repos():
-                    if repo.fork == False and repo.private == False and repo.name != notparsedrepo:
+                    controws = 0
+                    if repo.fork == False and repo.private == False:
                         count += 1
-                        print(count, "| ", orgs.login, " | ", repo.name)
                         reponame = repo.name
                         try:
                             for stat in repo.get_stats_contributors():
@@ -70,7 +78,7 @@ def export_code_frequency(organization, authToken, notparsedrepo=None):
                                     date = str(week.w)
                                     date = date[:10]
                                     if author in loginmembers:
-                                        print(".", end=" ")
+                                        controws+=1
                                         try:
                                             csvwriter.writerow(
                                                 [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
@@ -78,27 +86,26 @@ def export_code_frequency(organization, authToken, notparsedrepo=None):
                                         except:
                                             print("error")
                                     else:
-                                        print(".", end=" ")
+                                        controws += 1
                                         try:
                                             csvwriter.writerow(
                                                 [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
                                                  "no"])
                                         except:
                                             print("error2")
-                            print("")
+                            print("[", count, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
                             print("none")
                             csvwriter.writerow([count, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
             else:
                 next
 
-
 def export_community_engagement(organization, authToken):
     g = Github(authToken)
     with open("github_BasicInfo_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["count", "org", "repo", "forks", "stars", "commits", "collaborators", "description"])
+            ["count", "org", "repo", "forks", "stars", "commits", "collaborators"])
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
@@ -114,10 +121,10 @@ def export_community_engagement(organization, authToken):
                         for collab in repo.get_contributors():
                             countcollab += 1
                         print("[", count, "]", repo.name, "|", countcommit, "commits |", repo.forks_count, "forks |",
-                              repo.stargazers_count, "stars |", countcollab, "contributors|", repo.description)
+                              repo.stargazers_count, "stars |", countcollab, "contributors")
                         csvwriter.writerow(
                             [count, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
-                             countcollab, repo.description])
+                             countcollab])
 
 
 def list_unique_collaborators(organization, authToken):
@@ -155,38 +162,13 @@ def list_unique_collaborators(organization, authToken):
                                 print(count, "|", member, "|", collablogin, "|", collabname)
                                 csvwriter.writerow([count, collablogin, collabname, member])
 
+def main():
+    args = setup()
+    organization = args.org
+    authToken = args.token
+    list_org_members(organization, authToken)
+    export_code_frequency(organization, authToken)
+    export_community_engagement(organization, authToken)
 
-currenttoken = input("\n[STEP 1] Please provide personal access token --> ")
-
-orgs_list = list_orgs(currenttoken)
-
-print("\n[STEP 2] Select the organization you want to analyse:")
-for i in range(0, len(orgs_list)):
-    print("[", i, "] ", orgs_list[i])
-
-selectednumber = input(" ")
-dontparse = input("Repo not to be parsed: ")
-
-try:
-    currentorg = orgs_list[int(selectednumber)]
-    print("You chose:", currentorg, "\n")
-    print("[STEP 3]")
-    members_Yn = input("See the members of this org? [Y/n]: ")
-    unique_Yn = input("Export list of unique collaborators for this org? [Y/n]: ")
-    codefreq_Yn = input("Export code frequency for all repos? [Y/n]: ")
-    community_Yn = input("Export community metrics for all repos? [Y/n]: ")
-    print("\n======================= Starting process =======================\n")
-    if members_Yn == "Y" or members_Yn == "y":
-        print(list_org_members(currentorg, currenttoken))
-        print("")
-    if unique_Yn == "Y" or unique_Yn == "y":
-        print(list_unique_collaborators(currentorg, currenttoken))
-        print("")
-    if codefreq_Yn == "Y" or codefreq_Yn == "y":
-        export_code_frequency(currentorg, currenttoken, dontparse)
-        print("")
-    if community_Yn == "Y" or community_Yn == "y":
-        export_community_engagement(currentorg, currenttoken)
-    print("\n======================= End of process =======================\n")
-except:
-    print("Sorry, option not available")
+if __name__ == '__main__':
+    main()
