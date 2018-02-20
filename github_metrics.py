@@ -5,6 +5,7 @@ import json
 import os
 import csv
 import ssl
+import time
 
 def setup():
     parser = argparse.ArgumentParser()
@@ -54,8 +55,8 @@ def list_org_members(org, authToken):
 
 def export_code_frequency(organization, authToken):
     g = Github(authToken)
-    # time.sleep(15)
-    with open("github_RepoStatsContributions_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    time.sleep(15)
+    with open("github_code_frequency_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "external"])
@@ -102,7 +103,7 @@ def export_code_frequency(organization, authToken):
 
 def export_community_engagement(organization, authToken):
     g = Github(authToken)
-    with open("github_BasicInfo_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open("github_community_engagement_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "forks", "stars", "commits", "collaborators"])
@@ -129,7 +130,7 @@ def export_community_engagement(organization, authToken):
 
 def list_unique_collaborators(organization, authToken):
     g = Github(authToken)
-    with open("UniqueCollabs_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
+    with open("github_unique_collaborators_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(["name", "login", "name", "member of the org?"])
         loginmembers, namesmembers = list_org_members(organization, authToken)

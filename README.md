@@ -1,6 +1,6 @@
 # GitHub Metrics
 
-**Notice:** `urllib` to be migrated to `requests` library. 
+**Notice:** `urllib` already migrated to `requests` library. 
 
 I created this repo to gather some metrics for [sourced{d}](https://github.com/src-d/).
 I used [GitHub’s REST API v3](https://developer.github.com/v3/) and [PyGitHub](http://pygithub.readthedocs.io) to develop the Python scripts.
@@ -31,6 +31,11 @@ function that returns the number of unique collaborators of an organization (for
 
 function that gather basic metrics for all repos of an organization, such as number of forks, stars, commits and collaborators. The function returns a csv file with these informations for each repo.
 
+
+You execute the file on command line by typing:
+```
+$ python github_metrics.py -t [GITHUB-TOKEN] -o [ORGANIZATION NAME]
+```
 
 For all functions, you have to input your authorization token, that is provided by GitHub at [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
