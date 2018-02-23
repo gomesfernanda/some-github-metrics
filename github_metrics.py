@@ -59,12 +59,12 @@ def export_code_frequency(organization, authToken):
     with open("github_code_frequency_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "external"])
+            ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
         loginmembers, namesmembers = list_org_members(organization, authToken)
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering code frequency for all repos on", orgs.name, "\n")
+                print("Gathering code frequency for all repos on", orgs.name)
                 count = 0
                 for repo in orgs.get_repos():
                     controws = 0
@@ -110,7 +110,7 @@ def export_community_engagement(organization, authToken):
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering community metrics for", orgs.name, "\n")
+                print("Gathering community metrics for", orgs.name)
                 count = 0
                 for repo in orgs.get_repos():
                     countcommit = 0
@@ -139,7 +139,7 @@ def list_unique_collaborators(organization, authToken):
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering unique collaborators for", orgs.name, "\n")
+                print("Gathering unique collaborators for", orgs.name)
                 count = 0
                 for repo in orgs.get_repos():
                     if repo.fork == False and repo.private == False:
@@ -167,9 +167,18 @@ def main():
     args = setup()
     organization = args.org
     authToken = args.token
-    list_org_members(organization, authToken)
-    export_code_frequency(organization, authToken)
-    export_community_engagement(organization, authToken)
+    try:
+        g = Github(authToken)
+        ratelimit = g.rate_limiting
+        print("Valid token. Starting process. \n")
+        list_org_members(organization, authToken)
+        print("")
+        export_code_frequency(organization, authToken)
+        print("")
+        export_community_engagement(organization, authToken)
+    except:
+        print("Invalid token")
+
 
 if __name__ == '__main__':
     main()
