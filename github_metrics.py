@@ -2,9 +2,7 @@ import argparse
 from github import Github
 import requests
 import json
-import os
 import csv
-import ssl
 import time
 
 def setup():
@@ -167,8 +165,8 @@ def main():
     args = setup()
     organization = args.org
     authToken = args.token
+    g = Github(authToken)
     try:
-        g = Github(authToken)
         ratelimit = g.rate_limiting
         print("Valid token. Starting process. \n")
         list_org_members(organization, authToken)
