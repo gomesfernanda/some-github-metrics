@@ -94,7 +94,7 @@ def export_code_frequency(organization, authToken):
                                             print("error2")
                             print("[", count, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
-                            print("none")
+                            print(repo.name, "| none")
                             csvwriter.writerow([count, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
             else:
                 next
