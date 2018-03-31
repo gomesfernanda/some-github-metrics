@@ -6,6 +6,9 @@ I created this repo to gather some metrics for [sourced{d}](https://github.com/s
 I used [GitHub’s REST API v3](https://developer.github.com/v3/) and [PyGitHub](http://pygithub.readthedocs.io) to develop the Python scripts.
 
 There are 2 Python scripts.
+
+-------
+
 The `github_metrics.py` script runs the functions:
 
 **1) `list_orgs(token)`**
@@ -48,7 +51,7 @@ function that will check which repositories your token has push access to, insid
 
 **2) `export_traffic(org, authtoken)`**
 
-function that exports the traffic from GitHub repos that your token has push access to, for the last 14 days. It will create a csv fil for the following metrics: traffic (views), clones, paths and referrers. Please check [further documentation](https://developer.github.com/v3/repos/traffic/) from GitHub.
+function that exports the traffic from GitHub repos that your token has push access to, for the last 14 days. It will create a csv file for the following metrics: traffic (views), clones, paths and referrers. Please check [further documentation](https://developer.github.com/v3/repos/traffic/) from GitHub.
 
 You execute the file on command line by typing:
 ```
