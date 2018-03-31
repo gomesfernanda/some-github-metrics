@@ -1,9 +1,6 @@
 # Member list
 memblist*.txt
 
-# Resulting CSVs
-*.csv
-
 
 # Other
 bin/
@@ -15,3 +12,4 @@ WIP/
 WIP/**
 metrics-env/
 metrics-env/**
+output/**
