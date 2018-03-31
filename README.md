@@ -38,6 +38,8 @@ You execute the file on command line by typing:
 $ python github_metrics.py -t [GITHUB-TOKEN] -o [ORGANIZATION NAME]
 ```
 
+-------
+
 The script `export_traffic.py` runs the functions:
 
 **1) `test_push_access(org, authToken)`**
@@ -47,6 +49,11 @@ function that will check which repositories your token has push access to, insid
 **2) `export_traffic(org, authtoken)`**
 
 function that exports the traffic from GitHub repos that your token has push access to, for the last 14 days. It will create a csv fil for the following metrics: traffic (views), clones, paths and referrers. Please check [further documentation](https://developer.github.com/v3/repos/traffic/) from GitHub.
+
+You execute the file on command line by typing:
+```
+$ python export_traffic.py -t [GITHUB-TOKEN] -o [ORGANIZATION NAME]
+```
 
 For all functions, you have to input your authorization token, that is provided by GitHub at [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
