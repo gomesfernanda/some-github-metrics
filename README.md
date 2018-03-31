@@ -38,6 +38,7 @@ function that gather basic metrics for all repos of an organization, such as num
 
 You execute the file on command line by typing:
 ```
+$ pip install -r requirements.txt
 $ python github_metrics.py -t [GITHUB-TOKEN] -o [ORGANIZATION NAME]
 ```
 
