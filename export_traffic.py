@@ -4,6 +4,12 @@ import json
 from github import Github
 import csv
 from datetime import date, timedelta
+import os
+
+directory = "output"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 end_date = date.today() - timedelta(days=1)
 start_date = end_date - timedelta(days=14)
@@ -43,7 +49,7 @@ def export_traffic(organization, authtoken):
     s.headers.update({'Authorization': 'token ' + authtoken})
     g = Github(authtoken)
     repos_noaccess, repos_ok = test_push_access(organization, authtoken)
-    with open("github_views_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_views_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["repo", "date", "views count", "views uniques"])
@@ -66,7 +72,7 @@ def export_traffic(organization, authtoken):
                 csvwriter.writerow(
                     [i, fixeddate, date["count"], date["uniques"]])
     count=0
-    with open("github_clones_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_clones_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["repo", "date", "clones count", "clones uniques"])
@@ -82,7 +88,7 @@ def export_traffic(organization, authtoken):
                 csvwriter.writerow(
                     [i, fixeddate, date["count"], date["uniques"]])
     count=0
-    with open("github_paths_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_paths_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["start date", "end date", "repo", "path", "title", "count", "uniques"])
@@ -96,7 +102,7 @@ def export_traffic(organization, authtoken):
                 csvwriter.writerow(
                     [start_date, end_date, i, path["path"], path["title"], path["count"], path["uniques"]])
     count=0
-    with open("github_referrers_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_referrers_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["start date", "end date", "repo", "referrer", "count", "uniques"])
