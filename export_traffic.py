@@ -6,10 +6,6 @@ import csv
 from datetime import date, timedelta
 import os
 
-directory = "output"
-
-if not os.path.exists(directory):
-    os.makedirs(directory)
 
 end_date = date.today() - timedelta(days=1)
 start_date = end_date - timedelta(days=14)
@@ -43,7 +39,7 @@ def test_push_access(organization, authToken):
                         repos_ok.append(currentrepo)
     return repos_noaccess, repos_ok
 
-def export_traffic(organization, authtoken):
+def export_traffic(directory, organization, authtoken):
     count=0
     s = requests.Session()
     s.headers.update({'Authorization': 'token ' + authtoken})
@@ -123,6 +119,9 @@ def main():
     s = requests.Session()
     s.headers.update({'Authorization': 'token ' + authToken})
     g = Github(authToken)
+    directory = "output/" + organization
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     try:
         ratelimit = g.rate_limiting
         print("Valid token. Starting process. \n")
@@ -130,7 +129,7 @@ def main():
         print("Repos without push access: ", repos_noaccess, "\n")
         print("Repos ok: ", repos_ok, "\n")
         print("")
-        export_traffic(organization, authToken)
+        export_traffic(directory, organization, authToken)
     except:
         print("Could not complete tasks.")
 

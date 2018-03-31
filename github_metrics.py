@@ -3,13 +3,8 @@ from github import Github
 import requests
 import json
 import csv
-import time
 import os
 
-directory = "output"
-
-if not os.path.exists(directory):
-    os.makedirs(directory)
 
 def setup():
     parser = argparse.ArgumentParser()
@@ -57,9 +52,8 @@ def list_org_members(org, authToken):
             next
     return loginmembers, namesmembers
 
-def export_code_frequency(organization, authToken):
+def export_code_frequency(directory, organization, authToken):
     g = Github(authToken)
-    time.sleep(15)
     with open(directory + "/github_code_frequency_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
@@ -105,7 +99,7 @@ def export_code_frequency(organization, authToken):
             else:
                 next
 
-def export_community_engagement(organization, authToken):
+def export_community_engagement(directory, organization, authToken):
     g = Github(authToken)
     with open(directory + "/github_community_engagement_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -131,8 +125,7 @@ def export_community_engagement(organization, authToken):
                             [count, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
                              countcollab])
 
-
-def list_unique_collaborators(organization, authToken):
+def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
     with open(directory + "/github_unique_collaborators_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
@@ -172,14 +165,17 @@ def main():
     organization = args.org
     authToken = args.token
     g = Github(authToken)
+    directory = "output/" + organization
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     try:
         ratelimit = g.rate_limiting
         print("Valid token. Starting process. \n")
         list_org_members(organization, authToken)
         print("")
-        export_code_frequency(organization, authToken)
+        export_code_frequency(directory, organization, authToken)
         print("")
-        export_community_engagement(organization, authToken)
+        export_community_engagement(directory, organization, authToken)
     except:
         print("Invalid token")
 
