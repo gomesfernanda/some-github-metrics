@@ -6,6 +6,7 @@ memblist*.txt
 bin/
 include/
 lib/
+output/
 pip-selfcheck.json
 pyvenv.cfg
 WIP/
