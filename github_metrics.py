@@ -4,6 +4,7 @@ import requests
 import json
 import csv
 import os
+import datetime
 
 
 def setup():
@@ -54,7 +55,9 @@ def list_org_members(org, authToken):
 
 def export_code_frequency(directory, organization, authToken):
     g = Github(authToken)
-    with open(directory + "/github_code_frequency_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    today = str(datetime.date.today())
+    today = today.replace("-", "")
+    with open(directory + "/github_code_frequency_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
@@ -101,7 +104,9 @@ def export_code_frequency(directory, organization, authToken):
 
 def export_community_engagement(directory, organization, authToken):
     g = Github(authToken)
-    with open(directory + "/github_community_engagement_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    today = str(datetime.date.today())
+    today = today.replace("-", "")
+    with open(directory + "/github_community_engagement_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "forks", "stars", "commits", "collaborators"])

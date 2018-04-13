@@ -9,6 +9,8 @@ import os
 
 end_date = date.today() - timedelta(days=1)
 start_date = end_date - timedelta(days=14)
+today = str(date.today())
+today = today.replace("-", "")
 
 def setup():
     parser = argparse.ArgumentParser()
@@ -39,13 +41,12 @@ def test_push_access(organization, authToken):
                         repos_ok.append(currentrepo)
     return repos_noaccess, repos_ok
 
-def export_traffic(directory, organization, authtoken):
+def export_traffic(directory, organization, repos_ok, authtoken):
     count=0
     s = requests.Session()
     s.headers.update({'Authorization': 'token ' + authtoken})
     g = Github(authtoken)
-    repos_noaccess, repos_ok = test_push_access(organization, authtoken)
-    with open(directory + "/github_views_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_views_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["repo", "date", "views count", "views uniques"])
@@ -68,7 +69,7 @@ def export_traffic(directory, organization, authtoken):
                 csvwriter.writerow(
                     [i, fixeddate, date["count"], date["uniques"]])
     count=0
-    with open(directory + "/github_clones_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_clones_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["repo", "date", "clones count", "clones uniques"])
@@ -84,7 +85,7 @@ def export_traffic(directory, organization, authtoken):
                 csvwriter.writerow(
                     [i, fixeddate, date["count"], date["uniques"]])
     count=0
-    with open(directory + "/github_paths_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_paths_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["start date", "end date", "repo", "path", "title", "count", "uniques"])
@@ -98,7 +99,7 @@ def export_traffic(directory, organization, authtoken):
                 csvwriter.writerow(
                     [start_date, end_date, i, path["path"], path["title"], path["count"], path["uniques"]])
     count=0
-    with open(directory + "/github_referrers_" + organization + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_referrers_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["start date", "end date", "repo", "referrer", "count", "uniques"])
@@ -129,7 +130,7 @@ def main():
         print("Repos without push access: ", repos_noaccess, "\n")
         print("Repos ok: ", repos_ok, "\n")
         print("")
-        export_traffic(directory, organization, authToken)
+        export_traffic(directory, organization, repos_ok, authToken)
     except:
         print("Could not complete tasks.")
 
