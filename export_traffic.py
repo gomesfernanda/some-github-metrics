@@ -41,6 +41,21 @@ def test_push_access(organization, authToken):
                         repos_ok.append(currentrepo)
     return repos_noaccess, repos_ok
 
+
+def relevantrepos_noaccess(numstars, repos_noaccess, organization, authToken):
+    g = Github(authToken)
+    repos_dict = {}
+    allorgs = g.get_user().get_orgs()
+    for orgs in allorgs:
+        if orgs.login == organization:
+            for repo in orgs.get_repos():
+                reponame = repo.name
+                stars = repo.stargazers_count
+                if reponame in repos_noaccess and stars >= numstars:
+                    repos_dict[reponame] = stars
+    return repos_dict
+
+
 def export_traffic(directory, organization, repos_ok, authtoken):
     count=0
     s = requests.Session()
@@ -131,6 +146,10 @@ def main():
         print("Repos ok: ", repos_ok, "\n")
         print("")
         export_traffic(directory, organization, repos_ok, authToken)
+        print("")
+        print("Repos with over 25 stars without push access:")
+        print(relevantrepos_noaccess(25, repos_noaccess, organization, authToken))
+
     except:
         print("Could not complete tasks.")
 
