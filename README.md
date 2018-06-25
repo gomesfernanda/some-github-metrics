@@ -54,7 +54,8 @@ function that will check which repositories your token has push access to, insid
 
 function that exports the traffic from GitHub repos that your token has push access to, for the last 14 days. It will create a csv file for the following metrics: traffic (views), clones, paths and referrers. Please check [further documentation](https://developer.github.com/v3/repos/traffic/) from GitHub.
 
-**3) `relevantrepos_noaccess(numstars, repos_noaccess, organization, authToken)`** 
+**3) `relevantrepos_noaccess(numstars, repos_noaccess, organization, authToken)`**
+
 function that checks which repositories over `numstars` your token doesn't have access to, and returns a dictionary with the name of the repo and its number of stars.
 
 You execute the file on command line by typing:
