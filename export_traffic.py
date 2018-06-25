@@ -5,6 +5,8 @@ from github import Github
 import csv
 from datetime import date, timedelta
 import os
+import numpy as np
+import pandas as pd
 
 
 end_date = date.today() - timedelta(days=1)
@@ -57,76 +59,133 @@ def relevantrepos_noaccess(numstars, repos_noaccess, organization, authToken):
 
 
 def export_traffic(directory, organization, repos_ok, authtoken):
-    count=0
     s = requests.Session()
     s.headers.update({'Authorization': 'token ' + authtoken})
     g = Github(authtoken)
-    with open(directory + "/github_views_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ["repo", "date", "views count", "views uniques"])
-        reposlist = []
-        allrepos = g.get_user().get_repos()
-        print("Collecting traffic data from", organization, "repositories. \n")
-        for repo in allrepos:
-            repo_owner = str(repo.owner)
-            repo_owner = (repo_owner.replace('NamedUser(login="', "")).replace('")', "")
-            if repo.fork == False and repo.private == False and repo_owner == organization and repo.name in repos_ok:
-                reposlist.append(repo.name)
-        print("\n======================= VIEWS =======================")
-        for i in reposlist:
-            count+=1
-            print("[", count, "/", len(repos_ok), "] - views for", i)
-            r_views = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/views")
-            r_views = json.loads(r_views.text)
-            for date in r_views["views"]:
-                fixeddate = str(date["timestamp"]).replace("T00:00:00Z", "")
-                csvwriter.writerow(
-                    [i, fixeddate, date["count"], date["uniques"]])
+    reposlist = []
+    allrepos = g.get_user().get_repos()
+
+    print("Collecting traffic data from", organization, "repositories. \n")
+
+    for repo in allrepos:
+        repo_owner = str(repo.owner)
+        repo_owner = (repo_owner.replace('NamedUser(login="', "")).replace('")', "")
+        if repo.fork == False and repo.private == False and repo_owner == organization and repo.name in repos_ok:
+            reposlist.append(repo.name)
+
     count=0
-    with open(directory + "/github_clones_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ["repo", "date", "clones count", "clones uniques"])
-        print("\n======================= CLONES ======================")
-        for i in reposlist:
-            count += 1
-            print("[", count, "/", len(repos_ok), "] - clones for", i)
-            r_clones = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/clones")
-            r_clones = json.loads(r_clones.text)
-            for date in r_clones["clones"]:
-                fixeddate = str(date["timestamp"]).replace("T00:00:00Z","")
-                #fixeddate = fixeddate.replace("T00:00:00Z","")
-                csvwriter.writerow(
-                    [i, fixeddate, date["count"], date["uniques"]])
+    countrow = 0
+    views_array = np.zeros(((len(repos_ok) * 15), 4), dtype=np.object_)
+    views_array[0,0] = "Repo"
+    views_array[0,1] = "Date"
+    views_array[0,2] = "Views count"
+    views_array[0,3] = "Views unique"
+    print("\n======================= VIEWS =======================")
+    for i in reposlist:
+        count+=1
+        print("[", count, "/", len(repos_ok), "] - views for", i)
+        r_views = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/views")
+        r_views = json.loads(r_views.text)
+        for date in r_views["views"]:
+            countrow += 1
+            fixeddate = str(date["timestamp"]).replace("T00:00:00Z", "")
+            views_array[countrow, 0] = i
+            views_array[countrow, 1] = fixeddate
+            views_array[countrow, 2] = date["count"]
+            views_array[countrow, 3] = date["uniques"]
+    df = pd.DataFrame(views_array[1:], columns=views_array[0])
+    df = df[(df.T != 0).any()]
+    df['Date'] = pd.to_datetime(df.Date)
+    sorteddf = df.sort_values(['Date', 'Repo'])
+    sorteddf.to_csv(directory + "/github_views_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
+
     count=0
+    countrow = 0
+    clones_array = np.zeros(((len(repos_ok) * 15), 4), dtype=np.object_)
+    clones_array[0,0] = "Repo"
+    clones_array[0,1] = "Date"
+    clones_array[0,2] = "Clones count"
+    clones_array[0,3] = "Clones unique"
+    print("\n======================= CLONES ======================")
+    for i in reposlist:
+        count += 1
+        print("[", count, "/", len(repos_ok), "] - clones for", i)
+        r_clones = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/clones")
+        r_clones = json.loads(r_clones.text)
+        for date in r_clones["clones"]:
+            countrow += 1
+            fixeddate = str(date["timestamp"]).replace("T00:00:00Z", "")
+            clones_array[countrow, 0] = i
+            clones_array[countrow, 1] = fixeddate
+            clones_array[countrow, 2] = date["count"]
+            clones_array[countrow, 3] = date["uniques"]
+    df = pd.DataFrame(clones_array[1:], columns=clones_array[0])
+    df = df[(df.T != 0).any()]
+    df['Date'] = pd.to_datetime(df.Date)
+    sorteddf = df.sort_values(['Date', 'Repo'])
+    sorteddf.to_csv(directory + "/github_clones_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
+
+
+    count=0
+    countrow = 0
+    paths_array = np.zeros(((len(repos_ok) * 10), 7), dtype=np.object_)
+    paths_array[0, 0] = "Start date"
+    paths_array[0, 1] = "End date"
+    paths_array[0, 2] = "Repo"
+    paths_array[0, 3] = "Path"
+    paths_array[0, 4] = "Title"
+    paths_array[0, 5] = "Count"
+    paths_array[0, 6] = "Unique"
     with open(directory + "/github_paths_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["start date", "end date", "repo", "path", "title", "count", "uniques"])
-        print("\n======================= PATHS =======================")
-        for i in reposlist:
-            count +=1
-            print("[", count, "/", len(repos_ok), "] - paths for", i)
-            r_paths = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/paths")
-            r_paths = json.loads(r_paths.text)
-            for path in r_paths:
-                csvwriter.writerow(
-                    [start_date, end_date, i, path["path"], path["title"], path["count"], path["uniques"]])
+    print("\n======================= PATHS =======================")
+    for i in reposlist:
+        count +=1
+        print("[", count, "/", len(repos_ok), "] - paths for", i)
+        r_paths = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/paths")
+        r_paths = json.loads(r_paths.text)
+        for path in r_paths:
+            countrow += 1
+            paths_array[countrow, 0] = start_date
+            paths_array[countrow, 1] = end_date
+            paths_array[countrow, 2] = i
+            paths_array[countrow, 3] = path["path"]
+            paths_array[countrow, 4] = path["title"]
+            paths_array[countrow, 5] = path["count"]
+            paths_array[countrow, 6] = path["uniques"]
+    df = pd.DataFrame(paths_array[1:], columns=paths_array[0])
+    df = df[(df.T != 0).any()]
+    df.to_csv(directory + "/github_paths_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
+
+
     count=0
-    with open(directory + "/github_referrers_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ["start date", "end date", "repo", "referrer", "count", "uniques"])
-        print("\n======================= REFERRERS ===================")
-        for i in reposlist:
-            count+=1
-            print("[", count, "/", len(repos_ok), "] - referrers for", i)
-            r_referrers = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/referrers")
-            r_referrers = json.loads(r_referrers.text)
-            for reff in r_referrers:
-                csvwriter.writerow(
-                    [start_date, end_date, i, reff["referrer"], reff["count"], reff["uniques"]])
+    countrow = 0
+    referrers_array = np.zeros(((len(repos_ok) * 10), 6), dtype=np.object_)
+    referrers_array[0, 0] = "Start date"
+    referrers_array[0, 1] = "End date"
+    referrers_array[0, 2] = "Repo"
+    referrers_array[0, 3] = "Referrer"
+    referrers_array[0, 4] = "Count"
+    referrers_array[0, 5] = "Unique"
+    print("\n======================= REFERRERS ===================")
+    for i in reposlist:
+        count+=1
+        print("[", count, "/", len(repos_ok), "] - referrers for", i)
+        r_referrers = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/referrers")
+        r_referrers = json.loads(r_referrers.text)
+        for reff in r_referrers:
+            countrow += 1
+            referrers_array[countrow, 0] = start_date
+            referrers_array[countrow, 1] = end_date
+            referrers_array[countrow, 2] = i
+            referrers_array[countrow, 3] = reff["referrer"]
+            referrers_array[countrow, 4] = reff["count"]
+            referrers_array[countrow, 5] = reff["uniques"]
+    df = pd.DataFrame(referrers_array[1:], columns=referrers_array[0])
+    df = df[(df.T != 0).any()]
+    df.to_csv(directory + "/github_referrers_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
 
 def main():
     args = setup()
