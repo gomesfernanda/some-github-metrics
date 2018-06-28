@@ -6,8 +6,11 @@ import csv
 import os
 import datetime
 import socket
+import pandas as pd
 
 socket.setdefaulttimeout(60 * 60)
+today = datetime.date.today()
+todaystr = str(today)
 
 def setup():
     parser = argparse.ArgumentParser()
@@ -69,7 +72,7 @@ def export_code_frequency(directory, organization, authToken):
     with open(directory + "/github_code_frequency_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
+            ["date", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
         loginmembers, namesmembers = list_org_members(organization, authToken)
         for orgs in allorgs:
             if orgs.login == organization:
@@ -91,7 +94,7 @@ def export_code_frequency(directory, organization, authToken):
                                         controws+=1
                                         try:
                                             csvwriter.writerow(
-                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                [todaystr, orgs.login, reponame, date, week.a, week.d, week.c, author,
                                                  "yes"])
                                         except:
                                             print("error")
@@ -99,14 +102,14 @@ def export_code_frequency(directory, organization, authToken):
                                         controws += 1
                                         try:
                                             csvwriter.writerow(
-                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                [todaystr, orgs.login, reponame, date, week.a, week.d, week.c, author,
                                                  "no"])
                                         except:
                                             print("error2")
                             print("[", count, "|", totalrepos, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
                             print("[", count, "|", totalrepos, "] ", orgs.login, " | ", repo.name, "| none")
-                            csvwriter.writerow([count, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
+                            csvwriter.writerow([todaystr, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
             else:
                 next
 
@@ -124,7 +127,7 @@ def export_community_engagement(directory, organization, authToken):
     with open(directory + "/github_community_engagement_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["count", "org", "repo", "forks", "stars", "commits", "collaborators"])
+            ["date", "org", "repo", "forks", "stars", "commits", "collaborators"])
         for orgs in allorgs:
             if orgs.login == organization:
                 print("Gathering community metrics for", orgs.name)
@@ -141,7 +144,7 @@ def export_community_engagement(directory, organization, authToken):
                         print("[", count, "|", totalrepos, "]", repo.name, "|", countcommit, "commits |", repo.forks_count, "forks |",
                               repo.stargazers_count, "stars |", countcollab, "contributors")
                         csvwriter.writerow(
-                            [count, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
+                            [todaystr, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
                              countcollab])
 
 def list_unique_collaborators(directory, organization, authToken):
