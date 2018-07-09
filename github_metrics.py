@@ -72,7 +72,7 @@ def export_code_frequency(directory, organization, authToken):
     with open(directory + "/github_code_frequency_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["date", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
+            ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
         loginmembers, namesmembers = list_org_members(organization, authToken)
         for orgs in allorgs:
             if orgs.login == organization:
@@ -94,7 +94,7 @@ def export_code_frequency(directory, organization, authToken):
                                         controws+=1
                                         try:
                                             csvwriter.writerow(
-                                                [todaystr, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
                                                  "yes"])
                                         except:
                                             print("error")
@@ -102,14 +102,14 @@ def export_code_frequency(directory, organization, authToken):
                                         controws += 1
                                         try:
                                             csvwriter.writerow(
-                                                [todaystr, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
                                                  "no"])
                                         except:
                                             print("error2")
                             print("[", count, "|", totalrepos, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
                             print("[", count, "|", totalrepos, "] ", orgs.login, " | ", repo.name, "| none")
-                            csvwriter.writerow([todaystr, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
+                            csvwriter.writerow([count, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
             else:
                 next
 

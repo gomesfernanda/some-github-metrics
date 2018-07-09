@@ -75,11 +75,12 @@ def export_traffic(directory, organization, repos_ok, authtoken):
 
     count=0
     countrow = 0
-    views_array = np.zeros(((len(repos_ok) * 15), 4), dtype=np.object_)
-    views_array[0,0] = "Repo"
-    views_array[0,1] = "Date"
-    views_array[0,2] = "Views count"
-    views_array[0,3] = "Views unique"
+    views_array = np.zeros(((len(repos_ok) * 15), 5), dtype=np.object_)
+    views_array[0, 0] = "Org"
+    views_array[0, 1] = "Repo"
+    views_array[0, 2] = "Date"
+    views_array[0, 3] = "Views count"
+    views_array[0, 4] = "Views unique"
     print("\n======================= VIEWS =======================")
     for i in reposlist:
         count+=1
@@ -89,10 +90,11 @@ def export_traffic(directory, organization, repos_ok, authtoken):
         for date in r_views["views"]:
             countrow += 1
             fixeddate = str(date["timestamp"]).replace("T00:00:00Z", "")
-            views_array[countrow, 0] = i
-            views_array[countrow, 1] = fixeddate
-            views_array[countrow, 2] = date["count"]
-            views_array[countrow, 3] = date["uniques"]
+            views_array[countrow, 0] = organization
+            views_array[countrow, 1] = i
+            views_array[countrow, 2] = fixeddate
+            views_array[countrow, 3] = date["count"]
+            views_array[countrow, 4] = date["uniques"]
     df = pd.DataFrame(views_array[1:], columns=views_array[0])
     df = df[(df.T != 0).any()]
     df['Date'] = pd.to_datetime(df.Date)
@@ -101,11 +103,12 @@ def export_traffic(directory, organization, repos_ok, authtoken):
 
     count=0
     countrow = 0
-    clones_array = np.zeros(((len(repos_ok) * 15), 4), dtype=np.object_)
-    clones_array[0,0] = "Repo"
-    clones_array[0,1] = "Date"
-    clones_array[0,2] = "Clones count"
-    clones_array[0,3] = "Clones unique"
+    clones_array = np.zeros(((len(repos_ok) * 15), 5), dtype=np.object_)
+    clones_array[0, 0] = "Org"
+    clones_array[0, 1] = "Repo"
+    clones_array[0, 2] = "Date"
+    clones_array[0, 3] = "Clones count"
+    clones_array[0, 4] = "Clones unique"
     print("\n======================= CLONES ======================")
     for i in reposlist:
         count += 1
@@ -115,10 +118,11 @@ def export_traffic(directory, organization, repos_ok, authtoken):
         for date in r_clones["clones"]:
             countrow += 1
             fixeddate = str(date["timestamp"]).replace("T00:00:00Z", "")
-            clones_array[countrow, 0] = i
-            clones_array[countrow, 1] = fixeddate
-            clones_array[countrow, 2] = date["count"]
-            clones_array[countrow, 3] = date["uniques"]
+            clones_array[countrow, 0] = organization
+            clones_array[countrow, 1] = i
+            clones_array[countrow, 2] = fixeddate
+            clones_array[countrow, 3] = date["count"]
+            clones_array[countrow, 4] = date["uniques"]
     df = pd.DataFrame(clones_array[1:], columns=clones_array[0])
     df = df[(df.T != 0).any()]
     df['Date'] = pd.to_datetime(df.Date)
@@ -128,14 +132,15 @@ def export_traffic(directory, organization, repos_ok, authtoken):
 
     count=0
     countrow = 0
-    paths_array = np.zeros(((len(repos_ok) * 10), 7), dtype=np.object_)
+    paths_array = np.zeros(((len(repos_ok) * 10), 8), dtype=np.object_)
     paths_array[0, 0] = "Start date"
     paths_array[0, 1] = "End date"
-    paths_array[0, 2] = "Repo"
-    paths_array[0, 3] = "Path"
-    paths_array[0, 4] = "Title"
-    paths_array[0, 5] = "Count"
-    paths_array[0, 6] = "Unique"
+    paths_array[0, 2] = "Org"
+    paths_array[0, 3] = "Repo"
+    paths_array[0, 4] = "Path"
+    paths_array[0, 5] = "Title"
+    paths_array[0, 6] = "Count"
+    paths_array[0, 7] = "Unique"
     with open(directory + "/github_paths_" + organization + "_" + today + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
@@ -150,11 +155,12 @@ def export_traffic(directory, organization, repos_ok, authtoken):
             countrow += 1
             paths_array[countrow, 0] = start_date
             paths_array[countrow, 1] = end_date
-            paths_array[countrow, 2] = i
-            paths_array[countrow, 3] = path["path"]
-            paths_array[countrow, 4] = path["title"]
-            paths_array[countrow, 5] = path["count"]
-            paths_array[countrow, 6] = path["uniques"]
+            paths_array[countrow, 2] = organization
+            paths_array[countrow, 3] = i
+            paths_array[countrow, 4] = path["path"]
+            paths_array[countrow, 5] = path["title"]
+            paths_array[countrow, 6] = path["count"]
+            paths_array[countrow, 7] = path["uniques"]
     df = pd.DataFrame(paths_array[1:], columns=paths_array[0])
     df = df[(df.T != 0).any()]
     df.to_csv(directory + "/github_paths_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
@@ -162,13 +168,14 @@ def export_traffic(directory, organization, repos_ok, authtoken):
 
     count=0
     countrow = 0
-    referrers_array = np.zeros(((len(repos_ok) * 10), 6), dtype=np.object_)
+    referrers_array = np.zeros(((len(repos_ok) * 10), 7), dtype=np.object_)
     referrers_array[0, 0] = "Start date"
     referrers_array[0, 1] = "End date"
-    referrers_array[0, 2] = "Repo"
-    referrers_array[0, 3] = "Referrer"
-    referrers_array[0, 4] = "Count"
-    referrers_array[0, 5] = "Unique"
+    referrers_array[0, 2] = "Org"
+    referrers_array[0, 3] = "Repo"
+    referrers_array[0, 4] = "Referrer"
+    referrers_array[0, 5] = "Count"
+    referrers_array[0, 6] = "Unique"
     print("\n======================= REFERRERS ===================")
     for i in reposlist:
         count+=1
@@ -179,10 +186,11 @@ def export_traffic(directory, organization, repos_ok, authtoken):
             countrow += 1
             referrers_array[countrow, 0] = start_date
             referrers_array[countrow, 1] = end_date
-            referrers_array[countrow, 2] = i
-            referrers_array[countrow, 3] = reff["referrer"]
-            referrers_array[countrow, 4] = reff["count"]
-            referrers_array[countrow, 5] = reff["uniques"]
+            referrers_array[countrow, 2] = organization
+            referrers_array[countrow, 3] = i
+            referrers_array[countrow, 4] = reff["referrer"]
+            referrers_array[countrow, 5] = reff["count"]
+            referrers_array[countrow, 6] = reff["uniques"]
     df = pd.DataFrame(referrers_array[1:], columns=referrers_array[0])
     df = df[(df.T != 0).any()]
     df.to_csv(directory + "/github_referrers_" + organization + "_" + today + ".csv", sep=',', encoding='utf-8', index=False)
