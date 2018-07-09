@@ -84,7 +84,7 @@ def export_traffic(directory, organization, repos_ok, authtoken):
     print("\n======================= VIEWS =======================")
     for i in reposlist:
         count+=1
-        print("[", count, "/", len(repos_ok), "] - views for", i)
+        print("[", count, "|", len(repos_ok), "] - views for", i)
         r_views = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/views")
         r_views = json.loads(r_views.text)
         for date in r_views["views"]:
@@ -112,7 +112,7 @@ def export_traffic(directory, organization, repos_ok, authtoken):
     print("\n======================= CLONES ======================")
     for i in reposlist:
         count += 1
-        print("[", count, "/", len(repos_ok), "] - clones for", i)
+        print("[", count, "|", len(repos_ok), "] - clones for", i)
         r_clones = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/clones")
         r_clones = json.loads(r_clones.text)
         for date in r_clones["clones"]:
@@ -148,7 +148,7 @@ def export_traffic(directory, organization, repos_ok, authtoken):
     print("\n======================= PATHS =======================")
     for i in reposlist:
         count +=1
-        print("[", count, "/", len(repos_ok), "] - paths for", i)
+        print("[", count, "|", len(repos_ok), "] - paths for", i)
         r_paths = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/paths")
         r_paths = json.loads(r_paths.text)
         for path in r_paths:
@@ -179,7 +179,7 @@ def export_traffic(directory, organization, repos_ok, authtoken):
     print("\n======================= REFERRERS ===================")
     for i in reposlist:
         count+=1
-        print("[", count, "/", len(repos_ok), "] - referrers for", i)
+        print("[", count, "|", len(repos_ok), "] - referrers for", i)
         r_referrers = s.get("https://api.github.com/repos/" + organization + "/" + i + "/traffic/popular/referrers")
         r_referrers = json.loads(r_referrers.text)
         for reff in r_referrers:
