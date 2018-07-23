@@ -106,9 +106,9 @@ def export_code_frequency(directory, organization, authToken):
                                                  "no"])
                                         except:
                                             print("error2")
-                            print("[ ", count.zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
+                            print("[", str(count).zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
-                            print("[", count.zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name, "| none")
+                            print("[", str(count).zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name, "| none")
                             csvwriter.writerow([count, orgs.login, reponame, 0, 0, 0, 0, 0, "n/a"])
             else:
                 next
@@ -141,7 +141,7 @@ def export_community_engagement(directory, organization, authToken):
                             countcommit += 1
                         for collab in repo.get_contributors():
                             countcollab += 1
-                        print("[", count.zfill(2), "|", totalrepos, "]", repo.name, "|", countcommit, "commits |", repo.forks_count, "forks |",
+                        print("[", str(count).zfill(2), "|", totalrepos, "]", repo.name, "|", countcommit, "commits |", repo.forks_count, "forks |",
                               repo.stargazers_count, "stars |", countcollab, "contributors")
                         csvwriter.writerow(
                             [todaystr, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
@@ -179,7 +179,7 @@ def list_unique_collaborators(directory, organization, authToken):
                                     member = "yes"
                                 else:
                                     member = "no"
-                                print(count.zfill(2), "|", member, "|", collablogin, "|", collabname)
+                                print(str(count).zfill(2), "|", member, "|", collablogin, "|", collabname)
                                 csvwriter.writerow([count, collablogin, collabname, member])
 
 def main():
