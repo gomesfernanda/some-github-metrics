@@ -12,7 +12,7 @@ import time
 
 now = time.time()
 today = datetime.date.today()
-todaystr = str(today).replace("-","")
+todaystr = str(today).replace("-", "")
 
 
 def list_org_members(org, authToken):
@@ -66,16 +66,22 @@ def get_users_info(members_list, authToken):
     with open("github_users_info_" + todaystr + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Date interaction','Type interaction'])
+            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Date interaction', 'Type interaction'])
         for org in orgs:
             org_name = org.name
             org_login = org.login
             print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~ ", org_name, " ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             repos = org.get_repos()
+            totalrepos = 0
+            repocount = 0
+            for repo in repos:
+                if repo.fork == False:
+                    totalrepos += 1
             for i, repo in enumerate(repos):
                 if repo.fork == False:
                     repo_name = repo.name
-                    print("\n--> Repo:", repo_name)
+                    repocount += 1
+                    print("\n--> Repo [", repocount, "/", totalrepos, "] :", repo_name)
                     count = 0
                     forks = repo.get_forks()
                     for fork in forks:
@@ -86,7 +92,7 @@ def get_users_info(members_list, authToken):
                         forker_date = forker_date.date()
                         if forker_login not in members_list and forker_email != None:
                             count += 1
-                            print("fork // ", forker_email, "//", forker_date)
+                            print("fork //", forker_email, "//", forker_date)
                             csvwriter.writerow(
                                 [org_login, repo_name, forker_name, forker_login, forker_email, forker_date, "fork"])
                     stargazers = repo.get_stargazers_with_dates()
@@ -100,7 +106,8 @@ def get_users_info(members_list, authToken):
                             count += 1
                             print("star //", stargazer_email, "//", stargazer_date)
                             csvwriter.writerow(
-                                [org_login, repo_name, stargazer_name, stargazer_login, stargazer_email, stargazer_date, "star"])
+                                [org_login, repo_name, stargazer_name, stargazer_login, stargazer_email, stargazer_date,
+                                 "star"])
                     try:
                         stats = repo.get_stats_contributors()
                         for stat in stats:
@@ -119,12 +126,15 @@ def get_users_info(members_list, authToken):
                                 commiter_name = r_user['name']
                                 if commiter_email != None:
                                     count += 1
-                                    print("commit //", commiter_email, "//",commiter_date)
+                                    print("commit //", commiter_email, "//", commiter_date)
                                     csvwriter.writerow(
-                                        [org_login, repo_name, commiter_name, commiter_login, commiter_email, commiter_date, "commit"])
-                    except TypeError:
-                        print("type error, skipping")
+                                        [org_login, repo_name, commiter_name, commiter_login, commiter_email,
+                                         commiter_date,
+                                         "commit"])
+                    except TypeError as e:
+                        print(e)
                         next
+
 
 currenttoken = input("Type your Github token: ")
 
