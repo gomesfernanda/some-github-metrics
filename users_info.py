@@ -12,7 +12,7 @@ import time
 
 now = time.time()
 today = datetime.date.today()
-todaystr = str(today)
+todaystr = str(today).replace("-","")
 
 
 def list_org_members(org, authToken):
@@ -59,86 +59,57 @@ def get_rate_limit(authToken):
     return remaining
 
 
-def get_users_forked(members_list, authToken):
+def get_users_info(members_list, authToken):
     g = Github(authToken)
     s.headers.update({'Authorization': 'token ' + authToken})
     orgs = g.get_user().get_orgs()
-    with open("github_users_forked_" + todaystr + ".csv", 'w', encoding='utf-8') as csvfile:
+    with open("github_users_info_" + todaystr + ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Type interaction'])
+            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Date interaction','Type interaction'])
         for org in orgs:
             org_name = org.name
             org_login = org.login
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~ ", org_name, " ~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+            print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~ ", org_name, " ~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             repos = org.get_repos()
             for i, repo in enumerate(repos):
                 if repo.fork == False:
                     repo_name = repo.name
-                    print("\nCollecting e-mails for", repo_name)
+                    print("\n--> Repo:", repo_name)
                     count = 0
                     forks = repo.get_forks()
                     for fork in forks:
                         forker_login = fork.owner.login
                         forker_name = fork.owner.name
                         forker_email = fork.owner.email
+                        forker_date = fork.created_at
+                        forker_date = forker_date.date()
                         if forker_login not in members_list and forker_email != None:
                             count += 1
-                            print(forker_email)
-                            csvwriter.writerow([org_login, repo_name, forker_name, forker_login, forker_email, "fork"])
-                    print(" -----", str(count), "emails collected")
-
-def get_users_starred(members_list, authToken):
-    g = Github(authToken)
-    s.headers.update({'Authorization': 'token ' + authToken})
-    orgs = g.get_user().get_orgs()
-    with open("github_users_starred_" + todaystr + ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Type interaction'])
-        for org in orgs:
-            org_name = org.name
-            org_login = org.login
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~ ", org_name, " ~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
-            repos = org.get_repos()
-            for i, repo in enumerate(repos):
-                if repo.fork == False:
-                    repo_name = repo.name
-                    print("\nCollecting e-mails for", repo_name)
-                    count = 0
-                    stargazers = repo.get_stargazers()
+                            print("fork // ", forker_email, "//", forker_date)
+                            csvwriter.writerow(
+                                [org_login, repo_name, forker_name, forker_login, forker_email, forker_date, "fork"])
+                    stargazers = repo.get_stargazers_with_dates()
                     for stargazer in stargazers:
-                        stargazer_name = stargazer.name
-                        stargazer_login = stargazer.login
-                        stargazer_email = stargazer.email
+                        stargazer_name = stargazer.user.name
+                        stargazer_login = stargazer.user.login
+                        stargazer_email = stargazer.user.email
+                        stargazer_date = stargazer.starred_at
+                        stargazer_date = stargazer_date.date()
                         if stargazer_login not in members_list and stargazer_email != None:
                             count += 1
-                            print(stargazer_email)
+                            print("star //", stargazer_email, "//", stargazer_date)
                             csvwriter.writerow(
-                                [org_login, repo_name, stargazer_name, stargazer_login, stargazer_email, "star"])
-                    print(" -----", str(count), "emails collected")
-
-def get_users_comitted(members_list, authToken):
-    g = Github(authToken)
-    s.headers.update({'Authorization': 'token ' + authToken})
-    orgs = g.get_user().get_orgs()
-    with open("github_users_commited_" + todaystr + ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ['Organization', 'Repo', 'Name', 'Username', 'Email', 'Type interaction'])
-        for org in orgs:
-            org_name = org.name
-            org_login = org.login
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~ ", org_name, " ~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
-            repos = org.get_repos()
-            for i, repo in enumerate(repos):
-                if repo.fork == False:
-                    repo_name = repo.name
-                    print("\nCollecting e-mails for", repo_name)
-                    count = 0
+                                [org_login, repo_name, stargazer_name, stargazer_login, stargazer_email, stargazer_date, "star"])
                     try:
                         stats = repo.get_stats_contributors()
                         for stat in stats:
+                            weeks_list = []
+                            for week in stat.weeks:
+                                if week.c != 0:
+                                    weeks_list.append(week.w)
+                            commiter_date = weeks_list[-1]
+                            commiter_date = commiter_date.date()
                             commiter_login = str(stat.author)
                             commiter_login = (commiter_login.replace('NamedUser(login="', "")).replace('")', "")
                             if commiter_login not in members_list:
@@ -148,15 +119,12 @@ def get_users_comitted(members_list, authToken):
                                 commiter_name = r_user['name']
                                 if commiter_email != None:
                                     count += 1
-                                    print(commiter_email)
+                                    print("commit //", commiter_email, "//",commiter_date)
                                     csvwriter.writerow(
-                                        [org_login, repo_name, commiter_name, commiter_login, commiter_email,
-                                         "commit"])
+                                        [org_login, repo_name, commiter_name, commiter_login, commiter_email, commiter_date, "commit"])
                     except TypeError:
                         print("type error, skipping")
                         next
-                    print(" -----", str(count), "emails collected")
-
 
 currenttoken = input("Type your Github token: ")
 
@@ -164,8 +132,6 @@ remaining_limit = get_rate_limit(currenttoken)
 
 if remaining_limit > 0:
     members_login, members_name = list_org_members("src-d", currenttoken)
-    users_forked = get_users_forked(members_login, currenttoken)
-    users_starred = get_users_starred(members_login, currenttoken)
-    users_commited = get_users_comitted(members_login, currenttoken)
+    users_commited = get_users_info(members_login, currenttoken)
 elif remaining_limit == 0:
     print("rate limit exceeded")
