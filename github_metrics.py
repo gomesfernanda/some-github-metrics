@@ -194,7 +194,6 @@ def main():
         os.makedirs(directory)
 
     try:
-        ratelimit = g.rate_limiting
         print("Valid token. Starting process. \n")
         list_org_members(organization, authToken)
         print("")
