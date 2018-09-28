@@ -84,28 +84,30 @@ def export_code_frequency(directory, organization, authToken):
                         count += 1
                         reponame = repo.name
                         try:
-                            for stat in repo.get_stats_contributors():
+                            stats = repo.get_stats_contributors()
+                            for stat in stats:
                                 author = str(stat.author)
                                 author = (author.replace('NamedUser(login="', "")).replace('")', "")
                                 for week in stat.weeks:
-                                    date = str(week.w)
-                                    date = date[:10]
-                                    if author in loginmembers:
-                                        controws+=1
-                                        try:
-                                            csvwriter.writerow(
-                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
-                                                 "yes"])
-                                        except:
-                                            print("error")
-                                    else:
-                                        controws += 1
-                                        try:
-                                            csvwriter.writerow(
-                                                [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
-                                                 "no"])
-                                        except:
-                                            print("error2")
+                                    if week.c != 0:
+                                        date = str(week.w)
+                                        date = date[:10]
+                                        if author in loginmembers:
+                                            controws+=1
+                                            try:
+                                                csvwriter.writerow(
+                                                    [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                     "yes"])
+                                            except:
+                                                print("error")
+                                        else:
+                                            controws += 1
+                                            try:
+                                                csvwriter.writerow(
+                                                    [count, orgs.login, reponame, date, week.a, week.d, week.c, author,
+                                                     "no"])
+                                            except:
+                                                print("error2")
                             print("[", str(count).zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name,  " | ", controws, " rows in the file")
                         except:
                             print("[", str(count).zfill(2), "|", totalrepos, "] ", orgs.login, " | ", repo.name, "| none")
