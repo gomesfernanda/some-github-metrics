@@ -200,8 +200,8 @@ def main():
         export_code_frequency(directory, organization, authToken)
         print("")
         export_community_engagement(directory, organization, authToken)
-    except:
-        print("Invalid token")
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
