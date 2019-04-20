@@ -26,5 +26,5 @@ rsa==3.4.2
 selenium==3.8.1
 six==1.11.0
 slacker==0.9.60
-urllib3==1.24.1
+urllib3==1.24.2
 wrapt==1.10.11
