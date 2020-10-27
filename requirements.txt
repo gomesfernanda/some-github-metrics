@@ -3,7 +3,7 @@ bs4==0.0.1
 certifi==2018.1.18
 cffi==1.11.2
 chardet==3.0.4
-cryptography==1.7.2
+cryptography==3.2
 Deprecated==1.2.4
 googlemaps==2.5.1
 gspread==3.0.0
