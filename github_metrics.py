@@ -76,7 +76,7 @@ def export_code_frequency(directory, organization, authToken):
         loginmembers, namesmembers = list_org_members(organization, authToken)
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering code frequency for all repos on", orgs.name)
+                print("Gathering code frequency for all repos on", orgs.login)
                 count = 0
                 for repo in orgs.get_repos():
                     controws = 0
@@ -132,12 +132,17 @@ def export_community_engagement(directory, organization, authToken):
             ["date", "org", "repo", "forks", "stars", "commits", "collaborators"])
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering community metrics for", orgs.name)
+                print("Gathering community metrics for", orgs.login)
                 count = 0
                 for repo in orgs.get_repos():
+                    try:
+                        hascommits = repo.get_commits()[0]
+                    except:
+                        hascommits = False
+                        print(repo.name, 'is empty')
                     countcommit = 0
                     countcollab = 0
-                    if repo.fork == False and repo.private == False:
+                    if repo.fork == False and repo.private == False and hascommits != False:
                         count += 1
                         for commits in repo.get_commits():
                             countcommit += 1
@@ -160,7 +165,7 @@ def list_unique_collaborators(directory, organization, authToken):
         allorgs = g.get_user().get_orgs()
         for orgs in allorgs:
             if orgs.login == organization:
-                print("Gathering unique collaborators for", orgs.name)
+                print("Gathering unique collaborators for", orgs.login)
                 count = 0
                 for repo in orgs.get_repos():
                     if repo.fork == False and repo.private == False:
