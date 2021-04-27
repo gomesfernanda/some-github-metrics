@@ -2,12 +2,21 @@
 
 **Notice:** `urllib` already migrated to `requests` library. 
 
-I created this repo to gather some metrics for [sourced{d}](https://github.com/src-d/).
+I created this repo to gather some metrics for the company I used to work.
+Its purpose is to collect metrics around an organisarion repositories, such as commits, forks, stars etc.
+
 I used [GitHub’s REST API v3](https://developer.github.com/v3/) and [PyGitHub](http://pygithub.readthedocs.io) to develop the Python scripts.
+
+In order to be able to run this project you have to
+
+1) be a member of the organisation you want to collect the metrics from
+2) have a Github personal token (generate here: https://github.com/settings/tokens)
 
 There are 2 Python scripts.
 
 -------
+
+### FIRST SCRIPT
 
 The `github_metrics.py` script runs the functions:
 
@@ -43,6 +52,8 @@ $ python github_metrics.py -t [GITHUB-TOKEN] -o [ORGANIZATION NAME]
 ```
 
 -------
+
+### SECOND SCRIPT
 
 The script `export_traffic.py` runs the functions:
 
