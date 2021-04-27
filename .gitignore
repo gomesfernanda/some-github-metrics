@@ -3,6 +3,7 @@ memblist*.txt
 
 
 # Other
+credentials_google_drive.json
 bin/
 include/
 lib/
