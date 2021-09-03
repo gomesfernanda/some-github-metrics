@@ -154,6 +154,54 @@ def export_community_engagement(directory, organization, authToken):
                             [todaystr, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
                              countcollab])
 
+def export_repo_metrics(directory,organization, authToken):
+    g = Github(authToken)
+    dt_today = datetime.datetime.now()
+    today = dt_today.date()
+    today = str(today).replace("-", "")
+    
+    totalrepos = 0
+    allorgs = g.get_user().get_orgs()
+
+    with open(directory + "/github_repo_metrics_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',')
+        csvwriter.writerow(
+            ["date", "org", "repo", "open prs", "pr avg age", "pr max age", "open issues", "issue avg age", "issue max age"])
+        for orgs in allorgs:
+            if orgs.login == organization:
+                for repo in orgs.get_repos():
+                    if not repo.archived:
+                        # print(f'{repo.default_branch}')
+                        pr_open_count = 0
+                        pr_max_open = 0
+                        pr_total_open = 0
+                        pulls = repo.get_pulls(state='open', sort='created', base=repo.default_branch)
+                        for pr in pulls:
+                            pr_open_count += 1
+
+                            # print(f'{pr.created_at}')
+                            days_open = (dt_today - pr.created_at).days
+                            pr_total_open += days_open
+                            if days_open > pr_max_open:
+                                pr_max_open = days_open
+                        pr_avg_open = pr_total_open/pr_open_count if pr_open_count > 0 else 0
+                        
+                        i_open_count = 0
+                        i_max_open = 0
+                        i_total_open = 0
+                        for iss in repo.get_issues(state='open'):
+                            i_open_count += 1
+
+                            # print(f'{pr.created_at}')
+                            days_open = (dt_today - iss.created_at).days
+                            i_total_open += days_open
+                            if days_open > i_max_open:
+                                i_max_open = days_open
+                        i_avg_open = i_total_open/i_open_count if i_open_count > 0 else 0
+
+                        csvwriter.writerow(
+                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, i_open_count, i_avg_open, i_max_open])
+
 def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
     with open(directory + "/github_unique_collaborators_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
@@ -200,11 +248,12 @@ def main():
 
     try:
         print("Valid token. Starting process. \n")
-        list_org_members(organization, authToken)
-        print("")
-        export_code_frequency(directory, organization, authToken)
-        print("")
-        export_community_engagement(directory, organization, authToken)
+        export_repo_metrics(directory, organization, authToken)
+        # list_org_members(organization, authToken)
+        # print("")
+        # export_code_frequency(directory, organization, authToken)
+        # print("")
+        # export_community_engagement(directory, organization, authToken)
     except Exception as e:
         print(e)
 
