@@ -220,11 +220,11 @@ def export_repo_metrics(directory,organization, authToken):
                                 # if pr.created_at > pr_max_date:
                                 #     pr_max_date = pr.created_at
 
-                        pr_avg_open = pr_open_total_days/pr_open_count if pr_open_count > 0 else 0
-                        pr_avg_close_time = pr_closed_total_days/pr_closed_count if pr_closed_count > 0 else 0
-                        pr_pct_org = (pr_in_org/(pr_open_count + pr_closed_count)) * 100 if pr_closed_count + pr_open_count > 0 else 0
-                        pr_pct_non_org = (pr_non_org/(pr_open_count + pr_closed_count)) * 100 if pr_closed_count + pr_open_count > 0 else 0
-                        pr_pct_bot = (pr_bot/(pr_open_count + pr_closed_count)) * 100 if pr_closed_count + pr_open_count > 0 else 0
+                        pr_avg_open = f"{pr_open_total_days/pr_open_count:.2f}" if pr_open_count > 0 else 0
+                        pr_avg_close_time = f"{pr_closed_total_days/pr_closed_count:.2f}" if pr_closed_count > 0 else 0
+                        pr_pct_org = f"{(pr_in_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_pct_non_org = f"{(pr_non_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_pct_bot = f"{(pr_bot/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
                         
                         i_open_count = 0
                         i_max_open = 0
@@ -265,11 +265,11 @@ def export_repo_metrics(directory,organization, authToken):
                                 # if pr.created_at > pr_max_date:
                                 #     pr_max_date = pr.created_at
 
-                        i_avg_open = i_open_total_days/i_open_count if i_open_count > 0 else 0
-                        i_avg_close_time = i_closed_total_days/i_closed_count if i_closed_count > 0 else 0
-                        i_pct_org = (i_in_org/(i_open_count + i_closed_count)) * 100 if i_closed_count + i_open_count > 0 else 0
-                        i_pct_non_org = (i_non_org/(i_open_count + i_closed_count)) * 100 if i_closed_count + i_open_count > 0 else 0
-                        i_pct_bot = (i_bot/(i_open_count + i_closed_count)) * 100 if i_closed_count + i_open_count > 0 else 0
+                        i_avg_open = f"{i_open_total_days/i_open_count:.2f}" if i_open_count > 0 else 0
+                        i_avg_close_time = f"{i_closed_total_days/i_closed_count:.2f}" if i_closed_count > 0 else 0
+                        i_pct_org = f"{(i_in_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_pct_non_org = f"{(i_non_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_pct_bot = f"{(i_bot/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
 
                         csvwriter.writerow(
                             [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, pr_max_date.date(),
