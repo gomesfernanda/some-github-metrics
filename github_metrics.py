@@ -166,28 +166,52 @@ def export_repo_metrics(directory,organization, authToken):
     with open(directory + "/github_repo_metrics_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
-            ["date", "org", "repo", "open prs", "pr avg age", "pr max age", "open issues", "issue avg age", "issue max age"])
+            ["date", "org", "repo", "open prs", "pr avg age", "pr max age", "newest pr created", "closed prs", "avg time to close", "open issues", "issue avg age", "issue max age", "newest issue opened"])
         for orgs in allorgs:
             if orgs.login == organization:
+                print("Gathering repository metrics for", orgs.login)
                 for repo in orgs.get_repos():
                     if not repo.archived:
                         # print(f'{repo.default_branch}')
                         pr_open_count = 0
                         pr_max_open = 0
-                        pr_total_open = 0
-                        pulls = repo.get_pulls(state='open', sort='created', base=repo.default_branch)
+                        pr_max_date = datetime.datetime.min
+                        pr_open_total_days = 0
+                        pr_closed_count = 0
+                        pr_closed_total_days = 0
+                        pulls = repo.get_pulls(state='all', sort='created')
                         for pr in pulls:
-                            pr_open_count += 1
+                            if pr.state == 'open':
+                                pr_open_count += 1
 
-                            # print(f'{pr.created_at}')
-                            days_open = (dt_today - pr.created_at).days
-                            pr_total_open += days_open
-                            if days_open > pr_max_open:
-                                pr_max_open = days_open
-                        pr_avg_open = pr_total_open/pr_open_count if pr_open_count > 0 else 0
+                                # print(f'{pr.created_at}')
+                                days_open = (dt_today - pr.created_at).days
+                                pr_open_total_days += days_open
+                                if days_open > pr_max_open:
+                                    pr_max_open = days_open
+                                if pr.created_at > pr_max_date:
+                                    pr_max_date = pr.created_at
+                            else:
+                                pr_closed_count += 1
+
+                                # print(f'{pr.closed_at}')
+                                # print(f'{pr.merged_at}')
+                                closed = pr.closed_at if pr.closed_at else datetime.datetime.min
+                                merged = pr.merged_at if pr.merged_at else datetime.datetime.min
+                                end_date = max(closed, merged)
+                                days_open = (end_date- pr.created_at).days
+                                pr_closed_total_days += days_open
+                                # if days_open > pr_max_open:
+                                #     pr_max_open = days_open
+                                # if pr.created_at > pr_max_date:
+                                #     pr_max_date = pr.created_at
+
+                        pr_avg_open = pr_open_total_days/pr_open_count if pr_open_count > 0 else 0
+                        pr_avg_close_time = pr_closed_total_days/pr_closed_count if pr_closed_count > 0 else 0
                         
                         i_open_count = 0
                         i_max_open = 0
+                        i_max_date = datetime.datetime.min
                         i_total_open = 0
                         for iss in repo.get_issues(state='open'):
                             i_open_count += 1
@@ -197,10 +221,14 @@ def export_repo_metrics(directory,organization, authToken):
                             i_total_open += days_open
                             if days_open > i_max_open:
                                 i_max_open = days_open
+                            if iss.created_at > i_max_date:
+                                i_max_date = iss.created_at
                         i_avg_open = i_total_open/i_open_count if i_open_count > 0 else 0
 
                         csvwriter.writerow(
-                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, i_open_count, i_avg_open, i_max_open])
+                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, pr_max_date.date(),
+                            pr_closed_count, pr_avg_close_time, i_open_count, 
+                            i_avg_open, i_max_open, i_max_date.date()])
 
 def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
@@ -248,12 +276,14 @@ def main():
 
     try:
         print("Valid token. Starting process. \n")
-        export_repo_metrics(directory, organization, authToken)
+        # print("")
         # list_org_members(organization, authToken)
         # print("")
         # export_code_frequency(directory, organization, authToken)
         # print("")
         # export_community_engagement(directory, organization, authToken)
+        print("")
+        export_repo_metrics(directory, organization, authToken)
     except Exception as e:
         print(e)
 
