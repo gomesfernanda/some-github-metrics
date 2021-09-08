@@ -175,7 +175,6 @@ def export_repo_metrics(directory,organization, authToken):
                 members = orgs.get_members()
                 for repo in orgs.get_repos():
                     if not repo.archived:
-                        # print(f'{repo.default_branch}')
                         pr_open_count = 0
                         pr_max_open = 0
                         pr_max_date = datetime.datetime.min
@@ -195,30 +194,26 @@ def export_repo_metrics(directory,organization, authToken):
                             else:
                                 pr_non_org += 1
 
+                            if pr.created_at > pr_max_date:
+                                    pr_max_date = pr.created_at
+
                             if pr.state == 'open':
                                 pr_open_count += 1
 
-                                # print(f'{pr.created_at}')
                                 days_open = (dt_today - pr.created_at).days
                                 pr_open_total_days += days_open
                                 if days_open > pr_max_open:
                                     pr_max_open = days_open
-                                if pr.created_at > pr_max_date:
-                                    pr_max_date = pr.created_at
+                                
                             else:
                                 pr_closed_count += 1
 
-                                # print(f'{pr.closed_at}')
-                                # print(f'{pr.merged_at}')
                                 closed = pr.closed_at if pr.closed_at else datetime.datetime.min
                                 merged = pr.merged_at if pr.merged_at else datetime.datetime.min
                                 end_date = max(closed, merged)
                                 days_open = (end_date- pr.created_at).days
                                 pr_closed_total_days += days_open
-                                # if days_open > pr_max_open:
-                                #     pr_max_open = days_open
-                                # if pr.created_at > pr_max_date:
-                                #     pr_max_date = pr.created_at
+
 
                         pr_avg_open = f"{pr_open_total_days/pr_open_count:.2f}" if pr_open_count > 0 else 0
                         pr_avg_close_time = f"{pr_closed_total_days/pr_closed_count:.2f}" if pr_closed_count > 0 else 0
@@ -244,6 +239,9 @@ def export_repo_metrics(directory,organization, authToken):
                             else:
                                 i_non_org += 1
 
+                            if iss.created_at > i_max_date:
+                                i_max_date = iss.created_at
+
                             if iss.state == 'open':
                                 pr_open_count += 1
                                 i_open_count += 1
@@ -253,8 +251,7 @@ def export_repo_metrics(directory,organization, authToken):
                                 i_open_total_days += days_open
                                 if days_open > i_max_open:
                                     i_max_open = days_open
-                                if iss.created_at > i_max_date:
-                                    i_max_date = iss.created_at
+                                
                             else:
                                 i_closed_count += 1
 
@@ -322,12 +319,12 @@ def main():
 
     try:
         print("Valid token. Starting process. \n")
-        # print("")
-        # list_org_members(organization, authToken)
-        # print("")
-        # export_code_frequency(directory, organization, authToken)
-        # print("")
-        # export_community_engagement(directory, organization, authToken)
+        print("")
+        list_org_members(organization, authToken)
+        print("")
+        export_code_frequency(directory, organization, authToken)
+        print("")
+        export_community_engagement(directory, organization, authToken)
         print("")
         export_repo_metrics(directory, organization, authToken)
     except Exception as e:
