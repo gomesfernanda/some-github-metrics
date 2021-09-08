@@ -213,13 +213,17 @@ def export_repo_metrics(directory,organization, authToken):
                                 end_date = max(closed, merged)
                                 days_open = (end_date- pr.created_at).days
                                 pr_closed_total_days += days_open
+                                if days_open > pr_max_open:
+                                    pr_max_open = days_open
 
+                        print(f"{repo.name} - {pulls.totalCount} - {pr_open_count}")
 
                         pr_avg_open = f"{pr_open_total_days/pr_open_count:.2f}" if pr_open_count > 0 else 0
                         pr_avg_close_time = f"{pr_closed_total_days/pr_closed_count:.2f}" if pr_closed_count > 0 else 0
                         pr_pct_org = f"{(pr_in_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
                         pr_pct_non_org = f"{(pr_non_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
                         pr_pct_bot = f"{(pr_bot/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_display_date = pr_max_date.date() if pr_max_date != datetime.datetime.min else "N/A"
                         
                         i_open_count = 0
                         i_max_open = 0
@@ -243,7 +247,6 @@ def export_repo_metrics(directory,organization, authToken):
                                 i_max_date = iss.created_at
 
                             if iss.state == 'open':
-                                pr_open_count += 1
                                 i_open_count += 1
 
                                 # print(f'{pr.created_at}')
@@ -267,11 +270,12 @@ def export_repo_metrics(directory,organization, authToken):
                         i_pct_org = f"{(i_in_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
                         i_pct_non_org = f"{(i_non_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
                         i_pct_bot = f"{(i_bot/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_display_date = i_max_date.date() if i_max_date != datetime.datetime.min else "N/A"
 
                         csvwriter.writerow(
-                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, pr_max_date.date(),
+                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, pr_display_date,
                             pr_closed_count, pr_avg_close_time, pr_pct_org, pr_pct_non_org, pr_pct_bot, i_open_count, 
-                            i_avg_open, i_max_open, i_max_date.date(), i_pct_org, i_pct_non_org, i_pct_bot])
+                            i_avg_open, i_max_open, i_display_date, i_pct_org, i_pct_non_org, i_pct_bot])
 
 def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
