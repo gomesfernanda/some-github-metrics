@@ -74,5 +74,3 @@ function that exports the traffic from GitHub repos that your token has push acc
 **3) `relevantrepos_noaccess(numstars, repos_noaccess, organization, authToken)`**
 
 function that checks which repositories over `numstars` your token doesn't have access to, and returns a dictionary with the name of the repo and its number of stars.
-
-[![Analytics](https://ga-beacon.appspot.com/UA-109670866-1/some-github-metrics/readme?useReferer&utm_source=google&utm_medium=somegithub)](https://github.com/igrigorik/ga-beacon)
