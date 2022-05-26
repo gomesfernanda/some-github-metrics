@@ -77,7 +77,7 @@ TatSu==5.6.1
 tensorboard==2.5.0
 tensorboard-data-server==0.6.0
 tensorboard-plugin-wit==1.8.0
-tensorflow==2.5.0rc1
+tensorflow==2.7.2
 tensorflow-estimator==2.5.0rc0
 termcolor==1.1.0
 terminado==0.9.4
