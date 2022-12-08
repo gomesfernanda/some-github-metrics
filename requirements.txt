@@ -8,7 +8,7 @@ attrs==20.3.0
 backcall==0.2.0
 bleach==3.3.0
 cachetools==4.2.1
-certifi==2019.11.28
+certifi==2022.12.7
 cffi==1.14.5
 chardet==3.0.4
 cryptography==3.4.7
