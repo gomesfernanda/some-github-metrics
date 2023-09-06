@@ -154,6 +154,129 @@ def export_community_engagement(directory, organization, authToken):
                             [todaystr, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
                              countcollab])
 
+def export_repo_metrics(directory,organization, authToken):
+    g = Github(authToken)
+    dt_today = datetime.datetime.now()
+    today = dt_today.date()
+    today = str(today).replace("-", "")
+    
+    totalrepos = 0
+    allorgs = g.get_user().get_orgs()
+
+    with open(directory + "/github_repo_metrics_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',')
+        csvwriter.writerow(
+            ["date", "org", "repo", "open prs", "pr avg age", "pr max age", "newest pr created", "closed prs", "avg time to close", 
+            "pr \% in org", "pr \% non org", "pr \% bot",
+            "open issues", "issue avg age", "issue max age", "newest issue opened", "issue \% in org", "issue \% non org", "issue \% bot"])
+        for orgs in allorgs:
+            if orgs.login == organization:
+                print("Gathering repository metrics for", orgs.login)
+                members = orgs.get_members()
+                for repo in orgs.get_repos():
+                    if not repo.archived:
+                        pr_open_count = 0
+                        pr_max_open = 0
+                        pr_max_date = datetime.datetime.min
+                        pr_open_total_days = 0
+                        pr_closed_count = 0
+                        pr_closed_total_days = 0
+                        pr_in_org = 0
+                        pr_non_org = 0
+                        pr_bot = 0
+                        pulls = repo.get_pulls(state='all', sort='created')
+                        for pr in pulls:
+                            owner = pr.user
+                            if owner.login and "bot" in owner.login.lower():
+                                pr_bot += 1
+                            elif owner in members:
+                                pr_in_org += 1
+                            else:
+                                pr_non_org += 1
+
+                            if pr.created_at > pr_max_date:
+                                    pr_max_date = pr.created_at
+
+                            if pr.state == 'open':
+                                pr_open_count += 1
+
+                                days_open = (dt_today - pr.created_at).days
+                                pr_open_total_days += days_open
+                                if days_open > pr_max_open:
+                                    pr_max_open = days_open
+                                
+                            else:
+                                pr_closed_count += 1
+
+                                closed = pr.closed_at if pr.closed_at else datetime.datetime.min
+                                merged = pr.merged_at if pr.merged_at else datetime.datetime.min
+                                end_date = max(closed, merged)
+                                days_open = (end_date- pr.created_at).days
+                                pr_closed_total_days += days_open
+                                if days_open > pr_max_open:
+                                    pr_max_open = days_open
+
+                        print(f"{repo.name} - {pulls.totalCount} - {pr_open_count}")
+
+                        pr_avg_open = f"{pr_open_total_days/pr_open_count:.2f}" if pr_open_count > 0 else 0
+                        pr_avg_close_time = f"{pr_closed_total_days/pr_closed_count:.2f}" if pr_closed_count > 0 else 0
+                        pr_pct_org = f"{(pr_in_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_pct_non_org = f"{(pr_non_org/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_pct_bot = f"{(pr_bot/(pr_open_count + pr_closed_count)) * 100:.2f}" if pr_closed_count + pr_open_count > 0 else 0
+                        pr_display_date = pr_max_date.date() if pr_max_date != datetime.datetime.min else "N/A"
+                        
+                        i_open_count = 0
+                        i_max_open = 0
+                        i_max_date = datetime.datetime.min
+                        i_open_total_days = 0
+                        i_closed_count = 0
+                        i_closed_total_days = 0
+                        i_in_org = 0
+                        i_non_org = 0
+                        i_bot = 0
+                        for iss in repo.get_issues(state='all', sort='created'):
+                            owner = iss.user
+                            if owner.login and "bot" in owner.login.lower():
+                                i_bot += 1
+                            elif owner in members:
+                                i_in_org += 1
+                            else:
+                                i_non_org += 1
+
+                            if iss.created_at > i_max_date:
+                                i_max_date = iss.created_at
+
+                            if iss.state == 'open':
+                                i_open_count += 1
+
+                                # print(f'{pr.created_at}')
+                                days_open = (dt_today - iss.created_at).days
+                                i_open_total_days += days_open
+                                if days_open > i_max_open:
+                                    i_max_open = days_open
+                                
+                            else:
+                                i_closed_count += 1
+
+                                days_open = (iss.closed_at- iss.created_at).days
+                                i_closed_total_days += days_open
+                                # if days_open > pr_max_open:
+                                #     pr_max_open = days_open
+                                # if pr.created_at > pr_max_date:
+                                #     pr_max_date = pr.created_at
+
+                        i_avg_open = f"{i_open_total_days/i_open_count:.2f}" if i_open_count > 0 else 0
+                        i_avg_close_time = f"{i_closed_total_days/i_closed_count:.2f}" if i_closed_count > 0 else 0
+                        i_pct_org = f"{(i_in_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_pct_non_org = f"{(i_non_org/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_pct_bot = f"{(i_bot/(i_open_count + i_closed_count)) * 100:.2f}" if i_closed_count + i_open_count > 0 else 0
+                        i_display_date = i_max_date.date() if i_max_date != datetime.datetime.min else "N/A"
+
+                        csvwriter.writerow(
+                            [todaystr, organization, repo.name, pr_open_count, pr_avg_open, pr_max_open, pr_display_date,
+                            pr_closed_count, pr_avg_close_time, pr_pct_org, pr_pct_non_org, pr_pct_bot, i_open_count, 
+                            i_avg_open, i_max_open, i_display_date, i_pct_org, i_pct_non_org, i_pct_bot])
+
 def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
     with open(directory + "/github_unique_collaborators_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
@@ -200,11 +323,14 @@ def main():
 
     try:
         print("Valid token. Starting process. \n")
+        print("")
         list_org_members(organization, authToken)
         print("")
         export_code_frequency(directory, organization, authToken)
         print("")
         export_community_engagement(directory, organization, authToken)
+        print("")
+        export_repo_metrics(directory, organization, authToken)
     except Exception as e:
         print(e)
 
