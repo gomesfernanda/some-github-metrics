@@ -32,7 +32,7 @@ def test_push_access(organization, authToken):
         if orgs.login == organization:
             print("Checking push access for", orgs.name, "repositories. \n")
             for repo in orgs.get_repos():
-                if repo.fork == False and repo.private == False:
+                if repo.fork == False and repo.archived == False:
                     currentrepo = repo.name
                     r = s.get("https://api.github.com/repos/" + organization + "/" + currentrepo + "/traffic/views")
                     r_views = json.loads(r.text)
@@ -70,7 +70,7 @@ def export_traffic(directory, organization, repos_ok, authtoken):
     for repo in allrepos:
         repo_owner = str(repo.owner)
         repo_owner = (repo_owner.replace('NamedUser(login="', "")).replace('")', "")
-        if repo.fork == False and repo.private == False and repo_owner == organization and repo.name in repos_ok:
+        if repo.fork == False and repo.archived == False and repo_owner == organization and repo.name in repos_ok:
             reposlist.append(repo.name)
 
     count=0
